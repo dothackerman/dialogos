@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+msg_file="$1"
+msg="$(head -n1 "$msg_file")"
+
+pattern='^(feat|fix|docs|refactor|test|chore)\([a-z0-9._-]+\): .+$'
+
+if [[ ! "$msg" =~ $pattern ]]; then
+  cat <<'EOF'
+Invalid commit message format.
+Use:
+  feat(scope): summary
+  fix(scope): summary
+  docs(scope): summary
+  refactor(scope): summary
+  test(scope): summary
+  chore(scope): summary
+EOF
+  exit 1
+fi
