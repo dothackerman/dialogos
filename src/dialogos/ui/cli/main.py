@@ -169,16 +169,43 @@ def main() -> int:
 
             print(f"Transcript: {current_text}")
 
+            if not args.preview:
+                try:
+                    send_turn.execute(current_text)
+                except Exception as exc:  # noqa: BLE001
+                    print(f"Error: {exc}", file=sys.stderr)
+                    _maybe_log(
+                        log_turn,
+                        action="send_failed",
+                        transcript=current_text,
+                        language=transcript_result.language,
+                        tmux_target=target,
+                        preview=False,
+                        sent=False,
+                    )
+                else:
+                    _maybe_log(
+                        log_turn,
+                        action="send",
+                        transcript=current_text,
+                        language=transcript_result.language,
+                        tmux_target=target,
+                        preview=False,
+                        sent=True,
+                    )
+                    print(f"Sent transcript to tmux target '{target}'.")
+
+                if args.once:
+                    return 0
+                break
+
             while True:
                 action = confirm_turn.execute(
                     prompt_confirm(args.preview),
                     preview_mode=args.preview,
                 )
                 if action is None:
-                    if args.preview:
-                        print("Invalid choice. In preview mode, send must be explicit (type 'y').")
-                    else:
-                        print("Invalid choice. Press Enter to send or use e/r/s/q.")
+                    print("Invalid choice. In preview mode, send must be explicit (type 'y').")
                     continue
 
                 if action == "edit":
@@ -196,7 +223,7 @@ def main() -> int:
                         transcript=current_text,
                         language=transcript_result.language,
                         tmux_target=target,
-                        preview=args.preview,
+                        preview=True,
                         sent=False,
                     )
                     retry_turn = True
@@ -209,7 +236,7 @@ def main() -> int:
                         transcript=current_text,
                         language=transcript_result.language,
                         tmux_target=target,
-                        preview=args.preview,
+                        preview=True,
                         sent=False,
                     )
                     break
@@ -221,7 +248,7 @@ def main() -> int:
                         transcript=current_text,
                         language=transcript_result.language,
                         tmux_target=target,
-                        preview=args.preview,
+                        preview=True,
                         sent=False,
                     )
                     return 0
@@ -237,7 +264,7 @@ def main() -> int:
                     transcript=current_text,
                     language=transcript_result.language,
                     tmux_target=target,
-                    preview=args.preview,
+                    preview=True,
                     sent=True,
                 )
                 print(f"Sent transcript to tmux target '{target}'.")

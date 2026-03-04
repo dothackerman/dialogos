@@ -35,6 +35,7 @@ make alpha-reset
 
 `make alpha-preview` now defaults to a higher-quality alpha profile (`small` + `cuda` + `float16`) with automatic CPU fallback if CUDA runtime is unavailable.
 If model download warns about unauthenticated Hugging Face access, set `HF_TOKEN=hf_xxx` (see `docs/user/alpha-preview.md`).
+Normal mode sends transcripts directly; add `--preview` to enable confirm/edit/retry/skip before sending.
 
 ## Architecture snapshot
 

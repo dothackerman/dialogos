@@ -7,9 +7,9 @@
 - tmux mandatory transport (`tmux send-keys`)
 - Interactive indexed tmux pane picker for first-time setup
 - Remembered tmux target with CLI/env override support
-- Confirm-before-send controls:
-  - Normal mode: `Enter=send`, `e=edit`, `r=retry`, `s=skip`, `q=quit`
-  - Preview mode: explicit send only (`y=send`)
+- Send controls:
+  - Normal mode: direct send after transcription (no confirm prompt)
+  - Preview mode: confirmation flow with `y=send`, `e=edit`, `r=retry`, `s=skip`, `q=quit`
 - Local JSONL turn logging
 - Runtime diagnostics (`--doctor`)
 

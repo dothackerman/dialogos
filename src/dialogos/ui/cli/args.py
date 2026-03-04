@@ -71,7 +71,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--preview",
         action="store_true",
-        help="Preview mode: explicit send only (Enter does not send).",
+        help=("Preview mode: show confirm/edit/retry/skip flow and require explicit send (y)."),
     )
     parser.add_argument(
         "--log-file",

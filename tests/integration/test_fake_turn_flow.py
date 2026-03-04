@@ -45,6 +45,18 @@ class SenderAdapter:
         self.messages.append(text)
 
 
+class FlakySenderAdapter(SenderAdapter):
+    def __init__(self, failures_before_success: int) -> None:
+        super().__init__()
+        self.failures_before_success = failures_before_success
+
+    def send(self, text: str) -> None:
+        if self.failures_before_success > 0:
+            self.failures_before_success -= 1
+            raise RuntimeError("send failed")
+        super().send(text)
+
+
 class FakeTargetResolver:
     def __init__(self) -> None:
         self.validated: list[str] = []
@@ -78,7 +90,28 @@ class FakeOrchestrator:
         return result
 
 
-def run_fake_turn(
+def run_fake_turn_direct(
+    *,
+    orchestrator: FakeOrchestrator,
+    tmp_path: Path,
+) -> tuple[str, str | None]:
+    result = orchestrator.run_turn(
+        wav_path=tmp_path / f"turn-{orchestrator.capture.calls}.wav",
+        config=TurnConfig(language="auto"),
+        send_text=False,
+    )
+    current_text = result.text
+    if not current_text:
+        return "skip", None
+
+    try:
+        orchestrator.sender.send(current_text)
+    except RuntimeError:
+        return "send_failed", None
+    return "send", current_text
+
+
+def run_fake_turn_preview(
     *,
     orchestrator: FakeOrchestrator,
     tmp_path: Path,
@@ -91,7 +124,7 @@ def run_fake_turn(
 
     while True:
         result = orchestrator.run_turn(
-            wav_path=tmp_path / f"turn-{turn_index}.wav",
+            wav_path=tmp_path / f"preview-turn-{turn_index}.wav",
             config=TurnConfig(language="auto"),
             send_text=False,
         )
@@ -99,7 +132,7 @@ def run_fake_turn(
         current_text = result.text
 
         while True:
-            action = parse_confirm_action(next(decisions), preview_mode=False)
+            action = parse_confirm_action(next(decisions), preview_mode=True)
             assert action is not None
             if action == "edit":
                 current_text = next(edits)
@@ -114,7 +147,22 @@ def run_fake_turn(
             return "send", current_text
 
 
-def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
+def test_end_to_end_fake_turn_direct_send_without_preview(tmp_path: Path) -> None:
+    sender = SenderAdapter()
+    orchestrator = FakeOrchestrator(
+        capture=CaptureAdapter(),
+        stt=SttAdapter(["integration transcript"]),
+        sender=sender,
+    )
+
+    action, sent_text = run_fake_turn_direct(orchestrator=orchestrator, tmp_path=tmp_path)
+
+    assert action == "send"
+    assert sent_text == "integration transcript"
+    assert sender.messages == ["integration transcript"]
+
+
+def test_end_to_end_fake_turn_preview_send_edit_retry_skip(tmp_path: Path) -> None:
     # send
     sender = SenderAdapter()
     send_orchestrator = FakeOrchestrator(
@@ -122,10 +170,10 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
         stt=SttAdapter(["integration transcript"]),
         sender=sender,
     )
-    action, sent_text = run_fake_turn(
+    action, sent_text = run_fake_turn_preview(
         orchestrator=send_orchestrator,
         tmp_path=tmp_path,
-        decision_inputs=[""],
+        decision_inputs=["y"],
         edit_inputs=[],
     )
     assert action == "send"
@@ -139,10 +187,10 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
         stt=SttAdapter(["raw text"]),
         sender=sender,
     )
-    action, sent_text = run_fake_turn(
+    action, sent_text = run_fake_turn_preview(
         orchestrator=edit_orchestrator,
         tmp_path=tmp_path,
-        decision_inputs=["e", ""],
+        decision_inputs=["e", "y"],
         edit_inputs=["edited text"],
     )
     assert action == "send"
@@ -157,10 +205,10 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
         stt=SttAdapter(["first", "second"]),
         sender=sender,
     )
-    action, sent_text = run_fake_turn(
+    action, sent_text = run_fake_turn_preview(
         orchestrator=retry_orchestrator,
         tmp_path=tmp_path,
-        decision_inputs=["r", ""],
+        decision_inputs=["r", "y"],
         edit_inputs=[],
     )
     assert action == "send"
@@ -175,7 +223,7 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
         stt=SttAdapter(["discard me"]),
         sender=sender,
     )
-    action, sent_text = run_fake_turn(
+    action, sent_text = run_fake_turn_preview(
         orchestrator=skip_orchestrator,
         tmp_path=tmp_path,
         decision_inputs=["s"],
@@ -184,6 +232,24 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
     assert action == "skip"
     assert sent_text is None
     assert sender.messages == []
+
+
+def test_direct_send_failure_does_not_block_next_turn(tmp_path: Path) -> None:
+    sender = FlakySenderAdapter(failures_before_success=1)
+    orchestrator = FakeOrchestrator(
+        capture=CaptureAdapter(),
+        stt=SttAdapter(["first", "second"]),
+        sender=sender,
+    )
+
+    action, sent_text = run_fake_turn_direct(orchestrator=orchestrator, tmp_path=tmp_path)
+    assert action == "send_failed"
+    assert sent_text is None
+
+    action, sent_text = run_fake_turn_direct(orchestrator=orchestrator, tmp_path=tmp_path)
+    assert action == "send"
+    assert sent_text == "second"
+    assert sender.messages == ["second"]
 
 
 def test_remembered_target_reuse_and_cli_override(tmp_path: Path) -> None:

@@ -65,10 +65,11 @@ First run behavior:
 - You choose by number
 - Selected target is remembered in config by default
 
-Controls:
+Controls (normal mode):
 - Press `Enter` to start recording
 - Press `Enter` to stop recording
-- Confirm menu (normal mode): `Enter=send`, `e=edit`, `r=retry`, `s=skip`, `q=quit`
+- Transcript is sent to Codex directly (no confirm prompt)
+- `tmux send-keys ... C-m` submits automatically, so no extra Enter in Codex window
 
 Preview mode:
 
@@ -76,7 +77,8 @@ Preview mode:
 dialogos --preview
 ```
 
-In preview mode send is explicit: type `y` to send.
+Preview mode enables confirmation controls before send:
+- `y=send`, `e=edit`, `r=retry`, `s=skip`, `q=quit`
 
 ## 5) Target overrides
 
