@@ -7,8 +7,8 @@ Read these first:
 4. `docs/dev/architecture.md`
 
 Execution rule:
-- Implement exactly the approved Milestone 1 plan.
-- Do not redesign scope.
+- Implement exactly the approved milestone scope.
+- Do not redesign scope while executing.
 - Run `make gate` on host hardware before final push.
 
 Kickoff prompt for new Codex session:

@@ -29,13 +29,10 @@ Before pushing:
 make gate
 ```
 
-`make gate` includes:
-- formatter
-- lint checks
-- type checks
-- unit tests
-- integration tests
-- hardware-dependent tests
+`make gate` runs:
+- `make check` (format + lint + typing)
+- `make test-fast` (non-hardware suite)
+- `make test` (includes hardware tests)
 
 If hardware tests fail, the gate fails.
 
@@ -44,5 +41,5 @@ If hardware tests fail, the gate fails.
 1. Create or update `specs/<feature>.md`.
 2. Builder agent implements code + tests.
 3. Quality agent runs `make gate` and reviews architecture fit.
-4. Docs agent updates affected docs.
+4. Docs agent updates affected docs/specs.
 5. Merge only after required signoffs.

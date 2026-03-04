@@ -1,6 +1,6 @@
 # Deferred Ideas (Developer-only)
 
-This file intentionally stores ideas that are deferred to keep iteration fast.
+This file stores ideas intentionally deferred beyond Milestone 1.
 
 ## Product and UX
 - Activatable voice mode with silence-end auto-send
@@ -21,7 +21,7 @@ This file intentionally stores ideas that are deferred to keep iteration fast.
 ## tmux/Codex integration
 - Reply scraping robustness across terminal layouts
 - Turn-level timeout policy
-- Session auto-discovery of target pane
+- Session auto-discovery heuristics beyond current picker
 
 ## TTS milestone
 - Local `piper` adapter
@@ -29,10 +29,10 @@ This file intentionally stores ideas that are deferred to keep iteration fast.
 - Chunked streaming playback
 
 ## Observability (local only)
-- Structured local logs with turn IDs
+- Log rotation policy for `turns.jsonl`
 - Failure taxonomy and fast triage report command
 
 ## Packaging and distribution
 - Debian package path
 - `pipx` install path
-- signed release artifacts once product confidence is high
+- Signed release artifacts

@@ -9,12 +9,10 @@ PYTHON := $(VENV_PYTHON)
 endif
 
 install:
-	$(PYTHON) -m pip install -r requirements.txt
 	$(PYTHON) -m pip install -e .
 
 install-dev:
-	$(PYTHON) -m pip install -r requirements.txt -r requirements-dev.txt
-	$(PYTHON) -m pip install -e .
+	$(PYTHON) -m pip install -e .[dev]
 
 hooks:
 	chmod +x .githooks/commit-msg .githooks/pre-push scripts/validate_branch_name.sh
@@ -37,4 +35,4 @@ test:
 test-fast:
 	$(PYTHON) -m pytest -m "not hardware"
 
-gate: check test
+gate: check test-fast test

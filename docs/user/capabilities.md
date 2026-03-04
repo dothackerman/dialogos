@@ -1,19 +1,20 @@
 # Capabilities
 
-## MVP (current)
-- Local push-to-talk speech capture
+## Milestone 1 (current)
+- Local push-to-talk speech capture (`arecord`)
 - Local transcription via Whisper (`faster-whisper`)
-- German (`de`), English (`en`), and auto language detection
-- Optional clipboard copy of transcript
-- Optional transcript log append
+- Language options: `de`, `en`, `auto`
+- tmux mandatory transport (`tmux send-keys`)
+- Interactive indexed tmux pane picker for first-time setup
+- Remembered tmux target with CLI/env override support
+- Confirm-before-send controls:
+  - Normal mode: `Enter=send`, `e=edit`, `r=retry`, `s=skip`, `q=quit`
+  - Preview mode: explicit send only (`y=send`)
+- Local JSONL turn logging
 - Runtime diagnostics (`--doctor`)
 
-## In scope next
-- tmux transport to send confirmed transcript directly to Codex
-- Confirm-before-send as default interaction mode
-- Activatable voice mode: auto-send transcript after user stops speaking
-
 ## Out of scope right now
-- Cloud-only runtime dependencies
-- Usage analytics/telemetry
-- Spoken assistant replies (deferred milestone)
+- Always-on voice mode with silence segmentation
+- Spoken assistant replies (TTS)
+- Cloud-only dependencies
+- Telemetry/usage metrics

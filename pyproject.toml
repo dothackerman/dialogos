@@ -9,6 +9,13 @@ description = "Voice bridge for Linux users to talk to Codex."
 requires-python = ">=3.12"
 dependencies = ["faster-whisper>=1.1.0"]
 
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.11.0",
+  "pytest>=8.3.0",
+  "ruff>=0.6.0",
+]
+
 [project.scripts]
 dialogos = "dialogos.cli:main"
 

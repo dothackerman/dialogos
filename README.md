@@ -1,12 +1,13 @@
 # Dialogos
 
-Dialogos creates a voice channel between a Linux user and Codex:
-- You speak
-- Local speech-to-text transcribes
-- Transcript is reviewed and sent to Codex
-- Codex responds in text
+Dialogos creates a local voice channel from Linux microphone input to a selected Codex tmux pane:
+1. Push-to-talk capture
+2. Local transcription with `faster-whisper`
+3. Full confirm control before send
+4. Send confirmed text to tmux
+5. Persist target/config and JSONL turn logs
 
-Current milestone: push-to-talk with local transcription.
+Milestone status: **Milestone 1 complete** (local-first tmux transport flow).
 
 ## Why the name "Dialogos"?
 
@@ -23,6 +24,7 @@ The project goal matches that meaning: a natural conversational channel between 
 ### Agent-facing
 - [Agent Roles](docs/agents/roles.md)
 - [Agent Workflow](docs/agents/workflow.md)
+- [New Session Handoff](docs/agents/new-session-handoff.md)
 
 ### Developer-only
 - [Architecture](docs/dev/architecture.md)

@@ -14,19 +14,50 @@ import time
 from pathlib import Path
 from typing import Any
 
+from .adapters.tmux_sender import TmuxSender
+from .config import DialogosConfig, load_config, save_config
+from .contracts import TranscriptResult
+from .logging_jsonl import TurnLogEvent, append_turn_log
+from .orchestrator import PushToTalkOrchestrator, TurnConfig, parse_confirm_action
+from .tmux_picker import (
+    InvalidTmuxTargetError,
+    NoTmuxSessionError,
+    PickerAbortedError,
+    list_panes,
+    pick_target_interactive,
+    print_no_tmux_guidance,
+    validate_target,
+)
+
+
+class AlsaCaptureAdapter:
+    """Capture adapter backed by `arecord`."""
+
+    def record_once(self, output_path: Path, sample_rate: int, input_device: str | None) -> None:
+        record_once(output_path, sample_rate, input_device)
+
+
+class WhisperSttAdapter:
+    """Speech-to-text adapter backed by a loaded faster-whisper model."""
+
+    def __init__(self, model: Any) -> None:
+        self._model = model
+
+    def transcribe(self, wav_path: Path, language: str) -> TranscriptResult:
+        text = transcribe(self._model, wav_path, language)
+        return TranscriptResult(text=text, language=language)
+
 
 def parse_args() -> argparse.Namespace:
     examples = """Examples:
-  python3 talk_to_codex.py --copy
-  python3 talk_to_codex.py --model small --language auto
-  python3 talk_to_codex.py --model base --language de --once
-  python3 talk_to_codex.py --doctor
-  python3 talk_to_codex.py --device cuda --compute-type float16
-  python3 talk_to_codex.py --input-device hw:0,0
+  dialogos --model small --language auto
+  dialogos --pick-target
+  dialogos --tmux-target codex:0.1 --preview
+  dialogos --doctor
 """
     parser = argparse.ArgumentParser(
         prog="dialogos",
-        description="Record mic audio (push-to-talk) and transcribe locally with faster-whisper.",
+        description="Record mic audio, transcribe locally, and send confirmed text to tmux.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=examples,
     )
@@ -34,7 +65,7 @@ def parse_args() -> argparse.Namespace:
         "--model",
         default="base",
         help=(
-            "Whisper model size/name (default: base). Example: tiny, base, small, medium, large-v3."
+            "Whisper model size/name (default: base). Examples: tiny, base, small, medium, large-v3"
         ),
     )
     parser.add_argument(
@@ -50,7 +81,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--language",
         default="auto",
-        help="Language hint (default: auto). Examples: en, de, auto.",
+        choices=["de", "en", "auto"],
+        help="Language hint (default: auto).",
     )
     parser.add_argument(
         "--sample-rate",
@@ -64,59 +96,50 @@ def parse_args() -> argparse.Namespace:
         help="Optional ALSA capture device passed to arecord -D (example: hw:0,0).",
     )
     parser.add_argument(
-        "--once",
-        action="store_true",
-        help="Record/transcribe once, then exit.",
+        "--tmux-target",
+        default=None,
+        help="Explicit tmux target pane (highest priority).",
     )
     parser.add_argument(
-        "--copy",
+        "--pick-target",
         action="store_true",
-        help="Copy transcript to clipboard automatically when possible.",
+        help="Always open interactive tmux pane picker at startup.",
     )
     parser.add_argument(
-        "--append-file",
+        "--no-remember-target",
+        action="store_true",
+        help="Do not save chosen target into the config file.",
+    )
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Preview mode: explicit send only (Enter does not send).",
+    )
+    parser.add_argument(
+        "--log-file",
         type=Path,
         default=None,
-        help="Append every transcript line to this file.",
+        help="Override JSONL log path (default uses XDG_STATE_HOME fallback).",
+    )
+    parser.add_argument(
+        "--once",
+        action="store_true",
+        help="Run exactly one completed turn and exit.",
     )
     parser.add_argument(
         "--doctor",
         action="store_true",
-        help="Print local environment checks (arecord, clipboard tools, Python deps) and exit.",
+        help="Print local environment checks and exit.",
     )
     return parser.parse_args()
 
 
-def require_binary(binary: str) -> None:
+def require_binary(binary: str, *, apt_package: str) -> None:
     if shutil.which(binary):
         return
     print(f"Missing required binary: {binary}", file=sys.stderr)
-    print("Install it first (Ubuntu/Debian): sudo apt install alsa-utils", file=sys.stderr)
-    sys.exit(1)
-
-
-def pick_clipboard_cmd() -> list[str] | None:
-    # Wayland first, then X11.
-    if os.environ.get("WAYLAND_DISPLAY") and shutil.which("wl-copy"):
-        return ["wl-copy"]
-    if os.environ.get("DISPLAY") and shutil.which("xclip"):
-        return ["xclip", "-selection", "clipboard"]
-    if shutil.which("wl-copy"):
-        return ["wl-copy"]
-    if shutil.which("xclip"):
-        return ["xclip", "-selection", "clipboard"]
-    return None
-
-
-def copy_to_clipboard(text: str) -> bool:
-    cmd = pick_clipboard_cmd()
-    if not cmd:
-        return False
-    try:
-        subprocess.run(cmd, input=text.encode("utf-8"), check=True)
-        return True
-    except subprocess.SubprocessError:
-        return False
+    print(f"Install it first (Ubuntu/Debian): sudo apt install {apt_package}", file=sys.stderr)
+    raise SystemExit(1)
 
 
 def record_once(output_path: Path, sample_rate: int, input_device: str | None) -> None:
@@ -172,7 +195,6 @@ def record_once(output_path: Path, sample_rate: int, input_device: str | None) -
         if filtered:
             print("Recorder message:", " | ".join(filtered))
 
-    # A WAV with only header bytes usually means no usable audio was captured.
     try:
         if output_path.stat().st_size < 512:
             raise RuntimeError("No audio captured. Check microphone input and ALSA device.")
@@ -199,7 +221,7 @@ def build_model(model_name: str, device: str, compute_type: str) -> tuple[Any, s
         from faster_whisper import WhisperModel
     except ImportError as exc:
         print("Python package 'faster-whisper' is not installed.", file=sys.stderr)
-        print("Run: python3 -m pip install -r requirements.txt", file=sys.stderr)
+        print("Run: python3 -m pip install -e .", file=sys.stderr)
         raise SystemExit(1) from exc
 
     print(
@@ -238,17 +260,14 @@ def transcribe(model: Any, wav_path: Path, language: str) -> str:
 def run_doctor() -> int:
     print("Environment checks:")
     print(f"- arecord: {'OK' if shutil.which('arecord') else 'MISSING'}")
+    print(f"- tmux: {'OK' if shutil.which('tmux') else 'MISSING'}")
     print(f"- ffmpeg: {'OK' if shutil.which('ffmpeg') else 'MISSING'}")
-    print(f"- wl-copy: {'OK' if shutil.which('wl-copy') else 'MISSING'}")
-    print(f"- xclip: {'OK' if shutil.which('xclip') else 'MISSING'}")
     try:
         from faster_whisper import WhisperModel as _WhisperModel  # noqa: F401
 
         print("- faster-whisper: OK")
     except ImportError:
-        print(
-            "- faster-whisper: MISSING (install with: python3 -m pip install -r requirements.txt)"
-        )
+        print("- faster-whisper: MISSING (install with: python3 -m pip install -e .)")
     if shutil.which("arecord"):
         print("- ALSA capture devices (arecord -l):")
         result = subprocess.run(["arecord", "-l"], capture_output=True, text=True, check=False)
@@ -261,73 +280,252 @@ def run_doctor() -> int:
     return 0
 
 
+def prompt_turn_start() -> bool:
+    try:
+        choice = input("Press Enter to talk, or type 'q' then Enter to quit: ").strip().lower()
+    except EOFError:
+        print()
+        return False
+    return choice not in {"q", "quit", "exit"}
+
+
+def prompt_confirm(preview_mode: bool) -> str:
+    if preview_mode:
+        return input("Confirm [y=send, e=edit, r=retry, s=skip, q=quit]: ")
+    return input("Confirm [Enter=send, e=edit, r=retry, s=skip, q=quit]: ")
+
+
+def prompt_edit_text(current_text: str) -> str:
+    print(f"Current transcript: {current_text}")
+    edited = input("Edited transcript (empty keeps current): ").strip()
+    if edited:
+        return edited
+    return current_text
+
+
+def maybe_log(
+    *,
+    action: str,
+    transcript: str,
+    language: str,
+    tmux_target: str,
+    preview: bool,
+    sent: bool,
+    log_file: Path | None,
+) -> None:
+    try:
+        append_turn_log(
+            TurnLogEvent(
+                action=action,
+                transcript=transcript,
+                language=language,
+                tmux_target=tmux_target,
+                preview=preview,
+                sent=sent,
+            ),
+            path=log_file,
+        )
+    except OSError as exc:
+        print(f"Warning: could not write log file: {exc}", file=sys.stderr)
+
+
+def resolve_tmux_target(args: argparse.Namespace, remembered_target: str | None) -> str:
+    explicit_target = args.tmux_target
+    if isinstance(explicit_target, str) and explicit_target:
+        validate_target(explicit_target)
+        return explicit_target
+
+    if not args.pick_target:
+        env_target = os.environ.get("DIALOGOS_TMUX_TARGET")
+        if env_target:
+            validate_target(env_target)
+            return env_target
+
+        if remembered_target:
+            try:
+                validate_target(remembered_target)
+                return remembered_target
+            except InvalidTmuxTargetError as exc:
+                print(f"Remembered tmux target is invalid: {exc}", file=sys.stderr)
+                print("Falling back to interactive picker.", file=sys.stderr)
+
+    panes = list_panes()
+    return pick_target_interactive(panes)
+
+
 def main() -> int:
     args = parse_args()
     if args.doctor:
         return run_doctor()
 
-    require_binary("arecord")
+    require_binary("arecord", apt_package="alsa-utils")
+    require_binary("tmux", apt_package="tmux")
+
+    config = load_config()
+    try:
+        target = resolve_tmux_target(args, config.tmux_target)
+    except NoTmuxSessionError:
+        print_no_tmux_guidance()
+        return 1
+    except InvalidTmuxTargetError as exc:
+        print(f"Invalid tmux target: {exc}", file=sys.stderr)
+        return 1
+    except PickerAbortedError:
+        print("tmux target selection aborted.", file=sys.stderr)
+        return 1
+
+    if not args.no_remember_target and config.tmux_target != target:
+        save_config(DialogosConfig(tmux_target=target))
+
+    sender = TmuxSender(target)
 
     model, active_device, _active_compute_type = build_model(
         args.model, args.device, args.compute_type
     )
+    orchestrator = PushToTalkOrchestrator(
+        capture=AlsaCaptureAdapter(),
+        stt=WhisperSttAdapter(model),
+        sender=sender,
+    )
+    turn_config = TurnConfig(
+        sample_rate=args.sample_rate,
+        input_device=args.input_device,
+        language=args.language,
+    )
 
     while True:
-        try:
-            choice = input("Press Enter to talk, or type 'q' then Enter to quit: ").strip().lower()
-        except EOFError:
-            print()
-            return 0
-        if choice in {"q", "quit", "exit"}:
+        if not prompt_turn_start():
             return 0
 
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-            wav_path = Path(tmp.name)
+        retry_turn = True
+        while retry_turn:
+            retry_turn = False
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+                wav_path = Path(tmp.name)
 
-        text = ""
-        try:
-            record_once(wav_path, args.sample_rate, args.input_device)
-            print("Transcribing...")
+            transcript_result: TranscriptResult | None = None
+            current_text = ""
             try:
-                text = transcribe(model, wav_path, args.language)
+                print("Recording to temporary WAV...")
+                transcript_result = orchestrator.run_turn(
+                    wav_path,
+                    turn_config,
+                    send_text=False,
+                )
+                current_text = transcript_result.text.strip()
             except RuntimeError as exc:
                 if active_device in {"auto", "cuda"} and is_cuda_runtime_missing(exc):
                     print("CUDA inference failed during transcription. Retrying on CPU.")
                     model, active_device, _active_compute_type = build_model(
                         args.model, "cpu", "int8"
                     )
-                    text = transcribe(model, wav_path, args.language)
-                else:
-                    raise
-        except Exception as exc:
-            print(f"Error: {exc}", file=sys.stderr)
-            if args.once:
-                return 1
-            continue
-        finally:
-            wav_path.unlink(missing_ok=True)
+                    orchestrator = PushToTalkOrchestrator(
+                        capture=AlsaCaptureAdapter(),
+                        stt=WhisperSttAdapter(model),
+                        sender=sender,
+                    )
+                    retry_turn = True
+                    continue
+                print(f"Error: {exc}", file=sys.stderr)
+                break
+            except Exception as exc:  # noqa: BLE001
+                print(f"Error: {exc}", file=sys.stderr)
+                break
+            finally:
+                wav_path.unlink(missing_ok=True)
 
-        if not text:
-            print("Transcript: [no speech detected]")
-            if args.once:
+            if transcript_result is None:
+                break
+            if not current_text:
+                print("Transcript: [no speech detected]")
+                maybe_log(
+                    action="skip",
+                    transcript="",
+                    language=transcript_result.language,
+                    tmux_target=target,
+                    preview=args.preview,
+                    sent=False,
+                    log_file=args.log_file,
+                )
+                break
+
+            print(f"Transcript: {current_text}")
+
+            while True:
+                action = parse_confirm_action(
+                    prompt_confirm(args.preview), preview_mode=args.preview
+                )
+                if action is None:
+                    if args.preview:
+                        print("Invalid choice. In preview mode, send must be explicit (type 'y').")
+                    else:
+                        print("Invalid choice. Press Enter to send or use e/r/s/q.")
+                    continue
+
+                if action == "edit":
+                    current_text = prompt_edit_text(current_text).strip()
+                    if not current_text:
+                        print("Transcript is empty. Edit again, retry, skip, or quit.")
+                    else:
+                        print(f"Edited transcript: {current_text}")
+                    continue
+
+                if action == "retry":
+                    maybe_log(
+                        action="retry",
+                        transcript=current_text,
+                        language=transcript_result.language,
+                        tmux_target=target,
+                        preview=args.preview,
+                        sent=False,
+                        log_file=args.log_file,
+                    )
+                    retry_turn = True
+                    break
+
+                if action == "skip":
+                    maybe_log(
+                        action="skip",
+                        transcript=current_text,
+                        language=transcript_result.language,
+                        tmux_target=target,
+                        preview=args.preview,
+                        sent=False,
+                        log_file=args.log_file,
+                    )
+                    break
+
+                if action == "quit":
+                    maybe_log(
+                        action="quit",
+                        transcript=current_text,
+                        language=transcript_result.language,
+                        tmux_target=target,
+                        preview=args.preview,
+                        sent=False,
+                        log_file=args.log_file,
+                    )
+                    return 0
+
+                if not current_text:
+                    print("Cannot send an empty transcript. Edit, retry, or skip.")
+                    continue
+
+                sender.send(current_text)
+                maybe_log(
+                    action="send",
+                    transcript=current_text,
+                    language=transcript_result.language,
+                    tmux_target=target,
+                    preview=args.preview,
+                    sent=True,
+                    log_file=args.log_file,
+                )
+                print(f"Sent transcript to tmux target '{target}'.")
+                break
+
+            if args.once and not retry_turn:
                 return 0
-            continue
-
-        print(f"Transcript: {text}")
-
-        if args.append_file:
-            args.append_file.parent.mkdir(parents=True, exist_ok=True)
-            with args.append_file.open("a", encoding="utf-8") as handle:
-                handle.write(text + "\n")
-
-        if args.copy:
-            if copy_to_clipboard(text):
-                print("Copied transcript to clipboard.")
-            else:
-                print("Clipboard tool not found. Install wl-clipboard or xclip.")
-
-        if args.once:
-            return 0
 
 
 if __name__ == "__main__":

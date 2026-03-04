@@ -1,4 +1,4 @@
-"""tmux sender adapter placeholder for MVP Codex transport."""
+"""tmux sender adapter for Codex transport."""
 
 from __future__ import annotations
 
@@ -14,7 +14,12 @@ class TmuxSender(Sender):
         self.target = target
 
     def send(self, text: str) -> None:
-        subprocess.run(
+        result = subprocess.run(
             ["tmux", "send-keys", "-t", self.target, text, "C-m"],
-            check=True,
+            capture_output=True,
+            text=True,
+            check=False,
         )
+        if result.returncode != 0:
+            message = (result.stderr or result.stdout or "tmux send-keys failed").strip()
+            raise RuntimeError(message)

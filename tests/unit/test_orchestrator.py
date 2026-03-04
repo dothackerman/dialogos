@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from dialogos.contracts import TranscriptResult
-from dialogos.orchestrator import PushToTalkOrchestrator, TurnConfig
+from dialogos.orchestrator import PushToTalkOrchestrator, TurnConfig, parse_confirm_action
 
 
 class FakeCapture:
@@ -56,3 +56,21 @@ def test_run_turn_with_send(tmp_path: Path) -> None:
         send_text=True,
     )
     assert sender.messages == ["hello world"]
+
+
+def test_confirm_actions_normal_mode() -> None:
+    assert parse_confirm_action("", preview_mode=False) == "send"
+    assert parse_confirm_action("e", preview_mode=False) == "edit"
+    assert parse_confirm_action("r", preview_mode=False) == "retry"
+    assert parse_confirm_action("s", preview_mode=False) == "skip"
+    assert parse_confirm_action("q", preview_mode=False) == "quit"
+
+
+def test_confirm_actions_preview_mode_explicit_send() -> None:
+    assert parse_confirm_action("", preview_mode=True) is None
+    assert parse_confirm_action("y", preview_mode=True) == "send"
+    assert parse_confirm_action("send", preview_mode=True) == "send"
+    assert parse_confirm_action("e", preview_mode=True) == "edit"
+    assert parse_confirm_action("r", preview_mode=True) == "retry"
+    assert parse_confirm_action("s", preview_mode=True) == "skip"
+    assert parse_confirm_action("q", preview_mode=True) == "quit"
