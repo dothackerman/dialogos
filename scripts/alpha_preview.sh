@@ -25,6 +25,10 @@ ALPHA_DEVICE="${DIALOGOS_ALPHA_DEVICE:-cuda}"
 ALPHA_COMPUTE_TYPE="${DIALOGOS_ALPHA_COMPUTE_TYPE:-float16}"
 ALPHA_LANGUAGE="${DIALOGOS_ALPHA_LANGUAGE:-auto}"
 
+if [[ -n "${DIALOGOS_ALPHA_HF_TOKEN:-}" && -z "${HF_TOKEN:-}" ]]; then
+  export HF_TOKEN="$DIALOGOS_ALPHA_HF_TOKEN"
+fi
+
 MISSING=()
 for binary in tmux arecord; do
   if ! command -v "$binary" >/dev/null 2>&1; then
@@ -64,6 +68,13 @@ echo "Log path: $LOG_PATH"
 echo "Target resolution order: --tmux-target -> DIALOGOS_TMUX_TARGET -> remembered config -> picker"
 echo "Alpha default profile: model=$ALPHA_MODEL device=$ALPHA_DEVICE compute_type=$ALPHA_COMPUTE_TYPE language=$ALPHA_LANGUAGE"
 echo "(Dialogos auto-falls back to CPU int8 if CUDA runtime is unavailable.)"
+
+if [[ -n "${HF_TOKEN:-}" ]]; then
+  echo "HF Hub auth: HF_TOKEN detected (authenticated model downloads)."
+else
+  echo "HF Hub auth: no HF_TOKEN set (public models still work; downloads may be slower/rate-limited)."
+  echo "Set once per shell with: export HF_TOKEN=hf_xxx"
+fi
 
 echo
 echo "Running diagnostics (dialogos --doctor)..."

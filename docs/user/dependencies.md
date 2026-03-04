@@ -27,3 +27,12 @@ CPU mode remains supported and is the safe default.
 ## tmux requirement behavior
 - Dialogos validates target pane before send
 - If no tmux session exists, Dialogos shows guided setup and exits non-zero
+
+## Optional model download authentication
+- Set `HF_TOKEN` to authenticate Hugging Face Hub downloads and avoid anonymous-rate-limit warnings.
+- Optional for public models; runtime transcription remains local.
+
+```bash
+export HF_TOKEN=hf_xxx
+```
+

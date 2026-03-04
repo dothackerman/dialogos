@@ -50,6 +50,16 @@ export DIALOGOS_ALPHA_LANGUAGE=auto
 make alpha-preview
 ```
 
+To avoid Hugging Face anonymous-download warnings and improve model download reliability, set a token:
+
+```bash
+export HF_TOKEN=hf_xxx
+# optional alpha-scoped passthrough if you do not want to export HF_TOKEN globally:
+export DIALOGOS_ALPHA_HF_TOKEN=hf_xxx
+```
+
+`HF_TOKEN` is only used for model downloads from Hugging Face Hub. Transcription still runs locally.
+
 Dry run without launching the interactive loop:
 
 ```bash

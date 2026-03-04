@@ -17,6 +17,14 @@ make install-dev
 make hooks
 ```
 
+## Optional) Enable authenticated model downloads
+
+If you see Hugging Face anonymous-download warnings, set a token:
+
+```bash
+export HF_TOKEN=hf_xxx
+```
+
 ## 3) Fastest way to try Dialogos (alpha preview)
 
 ```bash
