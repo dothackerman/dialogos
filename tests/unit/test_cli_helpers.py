@@ -1,68 +1,87 @@
 from __future__ import annotations
 
-from argparse import Namespace
+from dialogos.adapters.stt.whisper import is_cuda_runtime_missing
+from dialogos.application.use_cases.resolve_target import ResolveTargetUseCase
+from dialogos.ports.targeting import InvalidTmuxTargetError, PaneEntry
 
-import pytest
 
-import dialogos.cli as cli
-from dialogos.tmux_picker import InvalidTmuxTargetError
+class FakeTargetResolver:
+    def __init__(self) -> None:
+        self.validated: list[str] = []
+        self.should_fail_target: str | None = None
+        self.panes: list[PaneEntry] = []
+        self.picked: str = ""
+
+    def validate_target(self, target: str) -> None:
+        self.validated.append(target)
+        if self.should_fail_target and target == self.should_fail_target:
+            raise InvalidTmuxTargetError("bad")
+
+    def list_panes(self) -> list[PaneEntry]:
+        return self.panes
+
+    def pick_target_interactive(self, panes: list[PaneEntry], **kwargs: object) -> str:
+        _ = panes
+        _ = kwargs
+        return self.picked
+
+    def print_no_tmux_guidance(self, **kwargs: object) -> None:
+        _ = kwargs
 
 
 def test_is_cuda_runtime_missing_true() -> None:
     err = RuntimeError("Library libcublas.so.12 is not found or cannot be loaded")
-    assert cli.is_cuda_runtime_missing(err)
+    assert is_cuda_runtime_missing(err)
 
 
 def test_is_cuda_runtime_missing_false() -> None:
     err = RuntimeError("some unrelated runtime error")
-    assert not cli.is_cuda_runtime_missing(err)
+    assert not is_cuda_runtime_missing(err)
 
 
-def test_resolve_tmux_target_prefers_cli(monkeypatch: pytest.MonkeyPatch) -> None:
-    validated: list[str] = []
+def test_resolve_tmux_target_prefers_cli() -> None:
+    resolver = FakeTargetResolver()
+    use_case = ResolveTargetUseCase(resolver)
 
-    def fake_validate(target: str) -> None:
-        validated.append(target)
+    result = use_case.execute(
+        explicit_target="cli:0.1",
+        pick_target=False,
+        env_target="env:0.1",
+        remembered_target="cfg:0.1",
+    )
 
-    monkeypatch.setattr(cli, "validate_target", fake_validate)
-    monkeypatch.setattr(cli, "list_panes", lambda: [])
-    monkeypatch.setattr(cli, "pick_target_interactive", lambda panes: "ignored")
-
-    args = Namespace(tmux_target="cli:0.1", pick_target=False)
-    target = cli.resolve_tmux_target(args, remembered_target="cfg:0.1")
-
-    assert target == "cli:0.1"
-    assert validated == ["cli:0.1"]
+    assert result.target == "cli:0.1"
+    assert resolver.validated == ["cli:0.1"]
 
 
-def test_resolve_tmux_target_falls_back_to_picker_for_invalid_config(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def fake_validate(target: str) -> None:
-        if target == "bad:target":
-            raise InvalidTmuxTargetError("bad")
+def test_resolve_tmux_target_falls_back_to_picker_for_invalid_config() -> None:
+    resolver = FakeTargetResolver()
+    resolver.should_fail_target = "bad:target"
+    resolver.panes = [PaneEntry(target="picked:0.1", command="bash", title="main")]
+    resolver.picked = "picked:0.1"
+    use_case = ResolveTargetUseCase(resolver)
 
-    monkeypatch.setattr(cli, "validate_target", fake_validate)
-    monkeypatch.setattr(cli, "list_panes", lambda: [object()])
-    monkeypatch.setattr(cli, "pick_target_interactive", lambda panes: "picked:0.1")
+    result = use_case.execute(
+        explicit_target=None,
+        pick_target=False,
+        env_target=None,
+        remembered_target="bad:target",
+    )
 
-    args = Namespace(tmux_target=None, pick_target=False)
-    target = cli.resolve_tmux_target(args, remembered_target="bad:target")
-
-    assert target == "picked:0.1"
+    assert result.target == "picked:0.1"
+    assert result.remembered_target_error == "bad"
 
 
-def test_resolve_tmux_target_uses_env_when_available(monkeypatch: pytest.MonkeyPatch) -> None:
-    validated: list[str] = []
+def test_resolve_tmux_target_uses_env_when_available() -> None:
+    resolver = FakeTargetResolver()
+    use_case = ResolveTargetUseCase(resolver)
 
-    def fake_validate(target: str) -> None:
-        validated.append(target)
+    result = use_case.execute(
+        explicit_target=None,
+        pick_target=False,
+        env_target="env:0.5",
+        remembered_target=None,
+    )
 
-    monkeypatch.setattr(cli, "validate_target", fake_validate)
-    monkeypatch.setenv("DIALOGOS_TMUX_TARGET", "env:0.5")
-    args = Namespace(tmux_target=None, pick_target=False)
-
-    target = cli.resolve_tmux_target(args, remembered_target=None)
-
-    assert target == "env:0.5"
-    assert validated == ["env:0.5"]
+    assert result.target == "env:0.5"
+    assert resolver.validated == ["env:0.5"]

@@ -5,57 +5,72 @@ Dialogos.
 
 Intent: enable a local-first communication channel between human speech and Codex text workflows.
 
-## Tier-1 platform
-- Ubuntu / TUXEDO OS
-
 ## Runtime posture
 - Local-first and offline-capable after model download
 - No telemetry
 - Local JSONL turn logs only
+- Milestone 2 refactor is behavior-preserving for Milestone 1 user flow
 
-## Module boundaries
+## Layered architecture target
 
-### `src/dialogos/cli.py`
-- CLI argument handling
-- startup target resolution
-- confirm loop and user prompts
+### `src/dialogos/domain/`
+- Pure business state and transitions (no side effects)
+- Owns turn state machine and confirm action semantics
+- No filesystem/subprocess/env/terminal/network imports
 
-### `src/dialogos/contracts.py`
-- typed contracts for adapters and data exchange
+### `src/dialogos/application/`
+- Use-case orchestration for turn flow
+- Coordinates domain decisions and port calls
+- May import `domain` and `ports`, never adapters
 
-### `src/dialogos/orchestrator.py`
-- capture/transcribe/send orchestration
-- confirm action parsing helpers
+### `src/dialogos/ports/`
+- Typed interfaces for external capabilities
+- Examples: audio capture, STT, sender, target resolver, config store, turn logger
 
-### `src/dialogos/tmux_picker.py`
-- tmux pane listing
-- interactive index-based picker
-- target validation and no-session guidance
+### `src/dialogos/adapters/`
+- Concrete side-effect implementations (tmux, ALSA, whisper, storage)
+- Implements `ports` contracts
 
-### `src/dialogos/config.py`
-- load/save remembered `tmux_target`
-- XDG config path resolution
+### `src/dialogos/ui/`
+- CLI argument parsing, prompts, output rendering, and dependency wiring
+- Entry points stay `dialogos` and `python3 -m dialogos`
+- May compose adapters and call application use-cases
 
-### `src/dialogos/logging_jsonl.py`
-- JSONL log schema and append
-- XDG state path resolution
+## Dependency direction (strict)
 
-### `src/dialogos/adapters/tmux_sender.py`
-- concrete tmux `send-keys` transport adapter
+Allowed:
+- `ui -> application`
+- `application -> domain`
+- `application -> ports`
+- `adapters -> ports`
+- `ui -> adapters` for composition only
 
-## Milestone 1 flow
-1. Resolve tmux target (`--tmux-target` -> `DIALOGOS_TMUX_TARGET` -> remembered -> picker)
+Forbidden:
+- `domain -> application|ui|adapters|ports`
+- `application -> adapters|ui`
+- `adapters -> application|domain|ui`
+- `ui -> domain`
+
+## Turn behavior (unchanged)
+1. Resolve tmux target (`--tmux-target` -> `DIALOGOS_TMUX_TARGET` -> remembered target -> picker)
 2. Validate target
 3. Capture push-to-talk audio
 4. Transcribe locally
 5. Confirm action (`send/edit/retry/skip/quit`)
 6. Send to tmux when confirmed
-7. Append JSONL log event
+7. Append JSONL turn log event
 
-## Language policy
-- supported: `de`, `en`, `auto`
+## Quality and enforcement
+- Use `make test-arch` for architecture boundary checks
+- `make gate` remains the blocking local gate
+- Architecture checks are expected to run inside `make check`/`make gate`
 
-## Quality gates
-- formatter + lint + typing + tests in local gate
-- hardware tests are blocking in `make gate`
-- branch and commit conventions enforced via git hooks
+## Testing taxonomy target
+- `tests/unit`: pure logic and helpers
+- `tests/contracts`: adapter compliance with port contracts
+- `tests/integration`: multi-component behavior with fakes/stubs where possible
+- `tests/hardware`: local runtime checks (tmux/ALSA)
+
+## Knowledge gradient entrypoints
+- Bootstrap: `docs/dev/patterns-quickstart.md`, `docs/dev/dependency-rules.md`
+- Deep dive: `docs/dev/patterns-deep-dive.md`, `docs/dev/adr/*`

@@ -1,18 +1,24 @@
 # New Session Handoff
 
-Read these first:
+## Read first (bootstrap pack)
 1. `AGENTS.md`
-2. `specs/milestone-1-multi-agent.md`
-3. `docs/agents/workflow.md`
-4. `docs/dev/architecture.md`
+2. `docs/dev/patterns-quickstart.md`
+3. `docs/dev/dependency-rules.md`
+4. `docs/agents/workflow.md`
 
-Execution rule:
-- Implement exactly the approved milestone scope.
-- Do not redesign scope while executing.
-- Run `make gate` on host hardware before final push.
+## Read on-demand (task-dependent)
+1. `docs/dev/patterns-deep-dive.md`
+2. `docs/dev/adr/README.md` and related ADR file(s)
+3. `src/dialogos/<layer>/README.md` for touched layer(s)
+4. `specs/milestone-2-architecture.md` for migration context
 
-Kickoff prompt for new Codex session:
+## Execution rule
+- Implement exactly approved scope from the active spec.
+- Preserve MVP runtime behavior unless the spec explicitly changes behavior.
+- Run `make test-arch` and `make gate` before final push.
+
+Kickoff prompt for a new Codex session:
 
 ```text
-Read AGENTS.md and specs/milestone-1-multi-agent.md first, then execute Milestone 1 exactly as specified.
+Read AGENTS.md, docs/dev/patterns-quickstart.md, and docs/dev/dependency-rules.md first. Then execute the assigned scope and keep layer boundaries strict.
 ```

@@ -21,7 +21,26 @@ Conventional commits are mandatory:
 - `test(scope): summary`
 - `chore(scope): summary`
 
+## Knowledge gradient
+
+Mandatory bootstrap docs for every session:
+- `AGENTS.md`
+- `docs/dev/patterns-quickstart.md`
+- `docs/dev/dependency-rules.md`
+- `docs/agents/new-session-handoff.md`
+
+On-demand docs:
+- `docs/dev/patterns-deep-dive.md`
+- `docs/dev/adr/*`
+- `src/dialogos/<layer>/README.md` for touched layer(s)
+
 ## Required local gate
+
+Run architecture checks early:
+
+```bash
+make test-arch
+```
 
 Before pushing:
 
@@ -29,7 +48,8 @@ Before pushing:
 make gate
 ```
 
-`make gate` runs:
+`make gate` is blocking and includes:
+- architecture/dependency enforcement checks
 - `make check` (format + lint + typing)
 - `make test-fast` (non-hardware suite)
 - `make test` (includes hardware tests)
@@ -39,7 +59,8 @@ If hardware tests fail, the gate fails.
 ## Workflow per feature
 
 1. Create or update `specs/<feature>.md`.
-2. Builder agent implements code + tests.
-3. Quality agent runs `make gate` and reviews architecture fit.
-4. Docs agent updates affected docs/specs.
-5. Merge only after required signoffs.
+2. Builder agent implements code + tests in owned layer(s).
+3. Builder validates layer dependency rules (`make test-arch`).
+4. Quality agent runs `make gate` and reviews architecture fit.
+5. Docs agent updates affected docs/specs, including ADRs when architecture decisions changed.
+6. Merge only after required signoffs.

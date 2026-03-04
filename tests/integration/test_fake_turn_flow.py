@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from argparse import Namespace
 from pathlib import Path
 
-import pytest
-
-import dialogos.cli as cli
-from dialogos.config import DialogosConfig, load_config, save_config
-from dialogos.contracts import TranscriptResult
-from dialogos.orchestrator import PushToTalkOrchestrator, TurnConfig, parse_confirm_action
+from dialogos.adapters.storage.config_store import TomlConfigStore
+from dialogos.application.use_cases.resolve_target import ResolveTargetUseCase
+from dialogos.application.use_cases.run_capture_transcribe import (
+    RunCaptureTranscribeUseCase,
+    TurnConfig,
+)
+from dialogos.domain.confirm_actions import parse_confirm_action
+from dialogos.ports.storage import DialogosConfig
+from dialogos.ports.stt import TranscriptResult
+from dialogos.ports.targeting import PaneEntry
 
 
 class CaptureAdapter:
@@ -42,9 +45,42 @@ class SenderAdapter:
         self.messages.append(text)
 
 
+class FakeTargetResolver:
+    def __init__(self) -> None:
+        self.validated: list[str] = []
+
+    def validate_target(self, target: str) -> None:
+        self.validated.append(target)
+
+    def list_panes(self) -> list[PaneEntry]:
+        return [PaneEntry(target="picked:0.1", command="bash", title="main")]
+
+    def pick_target_interactive(self, panes: list[PaneEntry], **kwargs: object) -> str:
+        _ = panes
+        _ = kwargs
+        return "picked:0.1"
+
+    def print_no_tmux_guidance(self, **kwargs: object) -> None:
+        _ = kwargs
+
+
+class FakeOrchestrator:
+    def __init__(self, capture: CaptureAdapter, stt: SttAdapter, sender: SenderAdapter) -> None:
+        self.capture = capture
+        self.stt = stt
+        self.sender = sender
+        self.runner = RunCaptureTranscribeUseCase(capture, stt)
+
+    def run_turn(self, wav_path: Path, config: TurnConfig, *, send_text: bool) -> TranscriptResult:
+        result = self.runner.execute(wav_path=wav_path, config=config)
+        if send_text:
+            self.sender.send(result.text)
+        return result
+
+
 def run_fake_turn(
     *,
-    orchestrator: PushToTalkOrchestrator,
+    orchestrator: FakeOrchestrator,
     tmp_path: Path,
     decision_inputs: list[str],
     edit_inputs: list[str],
@@ -74,16 +110,14 @@ def run_fake_turn(
                 return "skip", None
             if action == "quit":
                 return "quit", None
-            sender = orchestrator.sender
-            assert sender is not None
-            sender.send(current_text)
+            orchestrator.sender.send(current_text)
             return "send", current_text
 
 
 def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
     # send
     sender = SenderAdapter()
-    send_orchestrator = PushToTalkOrchestrator(
+    send_orchestrator = FakeOrchestrator(
         capture=CaptureAdapter(),
         stt=SttAdapter(["integration transcript"]),
         sender=sender,
@@ -100,7 +134,7 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
 
     # edit then send
     sender = SenderAdapter()
-    edit_orchestrator = PushToTalkOrchestrator(
+    edit_orchestrator = FakeOrchestrator(
         capture=CaptureAdapter(),
         stt=SttAdapter(["raw text"]),
         sender=sender,
@@ -118,7 +152,7 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
     # retry then send
     sender = SenderAdapter()
     retry_capture = CaptureAdapter()
-    retry_orchestrator = PushToTalkOrchestrator(
+    retry_orchestrator = FakeOrchestrator(
         capture=retry_capture,
         stt=SttAdapter(["first", "second"]),
         sender=sender,
@@ -136,7 +170,7 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
 
     # skip
     sender = SenderAdapter()
-    skip_orchestrator = PushToTalkOrchestrator(
+    skip_orchestrator = FakeOrchestrator(
         capture=CaptureAdapter(),
         stt=SttAdapter(["discard me"]),
         sender=sender,
@@ -152,28 +186,29 @@ def test_end_to_end_fake_turn_send_edit_retry_skip(tmp_path: Path) -> None:
     assert sender.messages == []
 
 
-def test_remembered_target_reuse_and_cli_override(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_remembered_target_reuse_and_cli_override(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
-    save_config(DialogosConfig(tmux_target="remembered:0.1"), config_path)
-    loaded = load_config(config_path)
+    config_store = TomlConfigStore(path=config_path)
+    config_store.save(DialogosConfig(tmux_target="remembered:0.1"))
+    loaded = config_store.load()
     assert loaded.tmux_target == "remembered:0.1"
 
-    validated: list[str] = []
+    resolver = FakeTargetResolver()
+    use_case = ResolveTargetUseCase(resolver)
 
-    def fake_validate(target: str) -> None:
-        validated.append(target)
+    resolved = use_case.execute(
+        explicit_target=None,
+        pick_target=False,
+        env_target=None,
+        remembered_target=loaded.tmux_target,
+    )
+    assert resolved.target == "remembered:0.1"
 
-    monkeypatch.setattr(cli, "validate_target", fake_validate)
-    monkeypatch.delenv("DIALOGOS_TMUX_TARGET", raising=False)
-
-    args = Namespace(tmux_target=None, pick_target=False)
-    resolved = cli.resolve_tmux_target(args, remembered_target=loaded.tmux_target)
-    assert resolved == "remembered:0.1"
-
-    override_args = Namespace(tmux_target="override:0.2", pick_target=False)
-    override = cli.resolve_tmux_target(override_args, remembered_target=loaded.tmux_target)
-    assert override == "override:0.2"
-    assert validated == ["remembered:0.1", "override:0.2"]
+    override = use_case.execute(
+        explicit_target="override:0.2",
+        pick_target=False,
+        env_target=None,
+        remembered_target=loaded.tmux_target,
+    )
+    assert override.target == "override:0.2"
+    assert resolver.validated == ["remembered:0.1", "override:0.2"]

@@ -1,4 +1,4 @@
-.PHONY: install install-dev hooks format lint typecheck check test test-fast gate
+.PHONY: install install-dev hooks format lint typecheck check test-arch test test-fast gate
 
 VENV_PYTHON := .venv/bin/python3
 
@@ -27,7 +27,10 @@ lint:
 typecheck:
 	$(PYTHON) -m mypy src tests talk_to_codex.py
 
-check: format lint typecheck
+check: format lint typecheck test-arch
+
+test-arch:
+	$(PYTHON) scripts/check_architecture.py
 
 test:
 	$(PYTHON) -m pytest
@@ -35,4 +38,4 @@ test:
 test-fast:
 	$(PYTHON) -m pytest -m "not hardware"
 
-gate: check test-fast test
+gate: check test-arch test-fast test
