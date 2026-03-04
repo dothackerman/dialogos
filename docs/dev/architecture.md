@@ -9,7 +9,7 @@ Intent: enable a local-first communication channel between human speech and Code
 - Local-first and offline-capable after model download
 - No telemetry
 - Local JSONL turn logs only
-- Milestone 2 refactor is behavior-preserving for Milestone 1 user flow
+- Milestone 3 hardening is behavior-preserving for Milestone 1 user flow
 
 ## Layered architecture target
 
@@ -62,8 +62,11 @@ Forbidden:
 
 ## Quality and enforcement
 - Use `make test-arch` for architecture boundary checks
+- Use `make check-rules` to validate business-rule to regression-test mappings
+- Use `make test-rules-fast` for non-hardware business-rule regressions
+- Use `make test-rules` for full business-rule regressions (includes hardware)
 - `make gate` remains the blocking local gate
-- Architecture checks are expected to run inside `make check`/`make gate`
+- Architecture and rule checks are expected to run inside `make check`/`make gate`
 
 ## Testing taxonomy target
 - `tests/unit`: pure logic and helpers

@@ -32,17 +32,17 @@ Allowed dependency flow:
 - CLI can parse/prompt/wire; turn decisions belong in application/domain.
 
 5. Boundaries are enforced, not optional.
-- Run `make test-arch` during development and `make gate` before push.
+- Run `make test-arch` and `make test-rules-fast` during development and `make gate` before push.
 
 ## If you only remember three things
 
 1. Do not import adapters from application or domain.
 2. Put decision logic in domain/application, not CLI prompt code.
-3. Before handoff, run `make test-arch` and then `make gate`.
+3. Before handoff, run `make test-arch`, `make test-rules-fast`, and then `make gate`.
 
 ## Fast start checklist
 
-1. Read this file and `docs/dev/dependency-rules.md`.
+1. Read this file, `docs/dev/dependency-rules.md`, and `docs/dev/business-rules.md`.
 2. Open only the touched layer README under `src/dialogos/<layer>/README.md`.
 3. Implement in the lowest valid layer.
 4. Add or update tests in the expected test category.

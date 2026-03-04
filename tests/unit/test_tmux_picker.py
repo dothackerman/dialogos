@@ -6,14 +6,12 @@ from contextlib import contextmanager
 
 import pytest
 
-from dialogos.tmux_picker import (
+from dialogos.adapters.tmux.target_resolver import TmuxTargetResolver
+from dialogos.ports.targeting import (
     InvalidTmuxTargetError,
     NoTmuxSessionError,
     PaneEntry,
     PickerAbortedError,
-    list_panes,
-    pick_target_interactive,
-    validate_target,
 )
 
 
@@ -33,7 +31,7 @@ def test_list_panes_parses_tmux_output(monkeypatch: pytest.MonkeyPatch) -> None:
         stderr="",
     )
     with patched_run(monkeypatch, result):
-        panes = list_panes()
+        panes = TmuxTargetResolver().list_panes()
 
     assert panes == [
         PaneEntry(target="codex:0.1", command="bash", title="main"),
@@ -50,7 +48,7 @@ def test_list_panes_raises_when_no_tmux_session(monkeypatch: pytest.MonkeyPatch)
     )
     with patched_run(monkeypatch, result):
         with pytest.raises(NoTmuxSessionError):
-            _ = list_panes()
+            _ = TmuxTargetResolver().list_panes()
 
 
 def test_validate_target_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -62,7 +60,7 @@ def test_validate_target_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
     )
     with patched_run(monkeypatch, result):
         with pytest.raises(InvalidTmuxTargetError):
-            validate_target("bad:0.1")
+            TmuxTargetResolver().validate_target("bad:0.1")
 
 
 def test_pick_target_interactive_by_index() -> None:
@@ -73,7 +71,7 @@ def test_pick_target_interactive_by_index() -> None:
     answers = iter(["2"])
     printed: list[str] = []
 
-    target = pick_target_interactive(
+    target = TmuxTargetResolver().pick_target_interactive(
         panes,
         input_fn=lambda _: next(answers),
         print_fn=printed.append,
@@ -87,8 +85,21 @@ def test_pick_target_interactive_abort() -> None:
     panes = [PaneEntry(target="codex:0.1", command="bash", title="main")]
 
     with pytest.raises(PickerAbortedError):
-        _ = pick_target_interactive(
+        _ = TmuxTargetResolver().pick_target_interactive(
             panes,
             input_fn=lambda _: "q",
             print_fn=lambda _: None,
         )
+
+
+def test_print_no_tmux_guidance_outputs_expected_steps() -> None:
+    lines: list[str] = []
+
+    TmuxTargetResolver().print_no_tmux_guidance(print_fn=lines.append)
+
+    assert lines == [
+        "No tmux session is running.",
+        "Start one with:",
+        "  tmux new -s codex",
+        "Then start Codex in that session and rerun Dialogos.",
+    ]

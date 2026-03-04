@@ -7,7 +7,7 @@ Dialogos creates a local voice channel from Linux microphone input to a selected
 4. Send confirmed text to tmux
 5. Persist target/config and JSONL turn logs
 
-Milestone status: **Milestone 2 architecture migration target** (runtime behavior from Milestone 1 remains unchanged).
+Milestone status: **Milestone 3 agent-first hardening in progress** (runtime behavior from Milestone 1 remains unchanged).
 
 ## Why the name "Dialogos"?
 
@@ -55,6 +55,7 @@ Reference docs:
 - [Architecture](docs/dev/architecture.md)
 - [Patterns Quickstart](docs/dev/patterns-quickstart.md)
 - [Dependency Rules](docs/dev/dependency-rules.md)
+- [Business Rules](docs/dev/business-rules.md)
 - [ADR Index](docs/dev/adr/README.md)
 
 ## Development commands
@@ -66,6 +67,9 @@ make hooks
 make alpha-preview
 make alpha-reset
 make test-arch
+make check-rules
+make test-rules-fast
+make test-rules
 make check
 make test-fast
 make test
@@ -90,6 +94,7 @@ make gate
 - [Architecture](docs/dev/architecture.md)
 - [Patterns Quickstart](docs/dev/patterns-quickstart.md)
 - [Dependency Rules](docs/dev/dependency-rules.md)
+- [Business Rules](docs/dev/business-rules.md)
 - [Patterns Deep Dive](docs/dev/patterns-deep-dive.md)
 - [ADR Index](docs/dev/adr/README.md)
 - [Deferred Ideas](docs/dev/deferred-ideas.md)

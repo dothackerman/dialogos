@@ -13,7 +13,7 @@ def main() -> int:
     if str(src) not in sys.path:
         sys.path.insert(0, str(src))
 
-    from dialogos.cli import main as dialogos_main
+    from dialogos.ui.cli.main import main as dialogos_main
 
     return dialogos_main()
 

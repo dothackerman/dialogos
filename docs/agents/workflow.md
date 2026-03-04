@@ -27,6 +27,7 @@ Mandatory bootstrap docs for every session:
 - `AGENTS.md`
 - `docs/dev/patterns-quickstart.md`
 - `docs/dev/dependency-rules.md`
+- `docs/dev/business-rules.md`
 - `docs/agents/new-session-handoff.md`
 
 On-demand docs:
@@ -58,6 +59,8 @@ make gate
 
 `make gate` is blocking and includes:
 - architecture/dependency enforcement checks
+- business-rule mapping checks (`make check-rules`)
+- fast business-rule regressions (`make test-rules-fast`)
 - `make check` (format + lint + typing)
 - `make test-fast` (non-hardware suite)
 - `make test` (includes hardware tests)

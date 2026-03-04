@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from dialogos.config import DialogosConfig, default_config_path, load_config, save_config
+from dialogos.adapters.storage.config_store import TomlConfigStore, default_config_path
+from dialogos.ports.storage import DialogosConfig
 
 
 def test_default_config_path_uses_xdg(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -13,14 +14,15 @@ def test_default_config_path_uses_xdg(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_load_config_missing_returns_default(tmp_path: Path) -> None:
-    config = load_config(tmp_path / "missing.toml")
+    config = TomlConfigStore(path=tmp_path / "missing.toml").load()
     assert config == DialogosConfig()
 
 
 def test_save_and_load_config_roundtrip(tmp_path: Path) -> None:
     path = tmp_path / "config.toml"
-    save_config(DialogosConfig(tmux_target="codex:0.1"), path)
-    loaded = load_config(path)
+    store = TomlConfigStore(path=path)
+    store.save(DialogosConfig(tmux_target="codex:0.1"))
+    loaded = store.load()
     assert loaded.tmux_target == "codex:0.1"
 
 
@@ -29,4 +31,4 @@ def test_load_config_rejects_non_string_target(tmp_path: Path) -> None:
     path.write_text("tmux_target = 123\n", encoding="utf-8")
 
     with pytest.raises(RuntimeError, match="Invalid tmux_target"):
-        _ = load_config(path)
+        _ = TomlConfigStore(path=path).load()

@@ -41,6 +41,7 @@ Run during development:
 
 ```bash
 make test-arch
+make test-rules-fast
 ```
 
 Run before push:

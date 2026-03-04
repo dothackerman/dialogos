@@ -37,7 +37,9 @@ def test_architecture_checker_reports_forbidden_imports() -> None:
     assert "src/dialogos/application/bad.py" in result.stderr
     assert "src/dialogos/domain/bad.py" in result.stderr
     assert "src/dialogos/ui/bad.py" in result.stderr
+    assert "src/dialogos/ui/legacy_import.py" in result.stderr
     assert "application -> adapters" in result.stderr
     assert "domain -> application" in result.stderr
     assert "ui -> domain" in result.stderr
+    assert "imports forbidden module 'dialogos.config.DialogosConfig'" in result.stderr
     assert "Fix:" in result.stderr

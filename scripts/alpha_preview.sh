@@ -49,13 +49,13 @@ if ! "$PYTHON" -c 'import dialogos' >/dev/null 2>&1; then
 fi
 
 CONFIG_PATH="$($PYTHON - <<'PY'
-from dialogos.config import default_config_path
+from dialogos.adapters.storage.config_store import default_config_path
 print(default_config_path())
 PY
 )"
 
 LOG_PATH="$($PYTHON - <<'PY'
-from dialogos.logging_jsonl import default_log_path
+from dialogos.adapters.storage.jsonl_turn_logger import default_log_path
 print(default_log_path())
 PY
 )"

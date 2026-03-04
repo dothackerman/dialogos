@@ -2,8 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dialogos.contracts import TranscriptResult
-from dialogos.orchestrator import PushToTalkOrchestrator, TurnConfig, parse_confirm_action
+from dialogos.application.use_cases.run_capture_transcribe import (
+    RunCaptureTranscribeUseCase,
+    TurnConfig,
+)
+from dialogos.application.use_cases.send_turn import SendTurnUseCase
+from dialogos.domain.confirm_actions import parse_confirm_action
+from dialogos.ports.stt import TranscriptResult
 
 
 class FakeCapture:
@@ -34,11 +39,10 @@ class FakeSender:
 def test_run_turn_without_send(tmp_path: Path) -> None:
     capture = FakeCapture()
     stt = FakeStt()
-    orchestrator = PushToTalkOrchestrator(capture=capture, stt=stt, sender=None)
-    result = orchestrator.run_turn(
+    use_case = RunCaptureTranscribeUseCase(capture=capture, stt=stt)
+    result = use_case.execute(
         tmp_path / "turn.wav",
         TurnConfig(language="de"),
-        send_text=False,
     )
     assert capture.called
     assert result.text == "hello world"
@@ -49,12 +53,13 @@ def test_run_turn_with_send(tmp_path: Path) -> None:
     capture = FakeCapture()
     stt = FakeStt()
     sender = FakeSender()
-    orchestrator = PushToTalkOrchestrator(capture=capture, stt=stt, sender=sender)
-    _ = orchestrator.run_turn(
+
+    use_case = RunCaptureTranscribeUseCase(capture=capture, stt=stt)
+    transcript = use_case.execute(
         tmp_path / "turn.wav",
         TurnConfig(language="en"),
-        send_text=True,
     )
+    SendTurnUseCase(sender=sender).execute(transcript.text)
     assert sender.messages == ["hello world"]
 
 

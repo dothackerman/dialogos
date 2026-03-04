@@ -19,6 +19,7 @@ class ArchitectureRules:
     source_root: Path
     layers: tuple[str, ...]
     forbidden: dict[str, set[str]]
+    forbidden_module_prefixes: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -34,8 +35,9 @@ class Violation:
     line: int
     column: int
     source_layer: str
-    target_layer: str
+    target_layer: str | None
     imported_module: str
+    violation_type: str
 
 
 @dataclass(frozen=True)
@@ -72,6 +74,7 @@ def load_rules(rules_path: Path) -> ArchitectureRules:
     source_root_value = raw.get("source_root")
     layers_value = raw.get("layers")
     forbidden_value = raw.get("forbidden")
+    forbidden_module_prefixes_value = raw.get("forbidden_module_prefixes", [])
 
     if not isinstance(root_package, str) or not root_package:
         raise ValueError("'root_package' must be a non-empty string")
@@ -83,6 +86,10 @@ def load_rules(rules_path: Path) -> ArchitectureRules:
         raise ValueError("'layers' must be a list of strings")
     if not isinstance(forbidden_value, dict):
         raise ValueError("'forbidden' must be a table mapping layer -> [layers]")
+    if not isinstance(forbidden_module_prefixes_value, list) or not all(
+        isinstance(item, str) and item for item in forbidden_module_prefixes_value
+    ):
+        raise ValueError("'forbidden_module_prefixes' must be a list of non-empty strings")
 
     layers = tuple(layers_value)
     unknown_layers = sorted(layer for layer in forbidden_value if layer not in layers)
@@ -114,6 +121,7 @@ def load_rules(rules_path: Path) -> ArchitectureRules:
         source_root=source_root,
         layers=layers,
         forbidden=forbidden,
+        forbidden_module_prefixes=tuple(forbidden_module_prefixes_value),
     )
 
 
@@ -242,6 +250,10 @@ def collect_imports(
     return found
 
 
+def matches_module_prefix(module_name: str, prefix: str) -> bool:
+    return module_name == prefix or module_name.startswith(f"{prefix}.")
+
+
 def check_file(
     file_path: Path, rules: ArchitectureRules
 ) -> tuple[list[Violation], ParseError | None]:
@@ -267,6 +279,23 @@ def check_file(
     forbidden_targets = rules.forbidden.get(source_layer, set())
 
     for imported in collect_imports(tree, current_package, rules):
+        if any(
+            matches_module_prefix(imported.module, prefix)
+            for prefix in rules.forbidden_module_prefixes
+        ):
+            violations.append(
+                Violation(
+                    file_path=file_path,
+                    line=imported.line,
+                    column=imported.column,
+                    source_layer=source_layer,
+                    target_layer=None,
+                    imported_module=imported.module,
+                    violation_type="module",
+                )
+            )
+            continue
+
         target_layer = layer_for_module(imported.module, rules)
         if target_layer is None:
             continue
@@ -281,6 +310,7 @@ def check_file(
                 source_layer=source_layer,
                 target_layer=target_layer,
                 imported_module=imported.module,
+                violation_type="layer",
             )
         )
 
@@ -312,7 +342,7 @@ def format_path(path: Path, base: Path) -> str:
         return str(path)
 
 
-def violation_hint(source_layer: str, target_layer: str) -> str:
+def layer_violation_hint(source_layer: str, target_layer: str) -> str:
     if source_layer == "application" and target_layer == "adapters":
         return "Depend on a contract in dialogos.ports and inject the adapter from dialogos.ui."
     if source_layer == "ui" and target_layer == "domain":
@@ -320,6 +350,22 @@ def violation_hint(source_layer: str, target_layer: str) -> str:
     if target_layer == "ui":
         return "Move CLI concerns out of lower layers and keep them in dialogos.ui."
     return "Move the dependency to an allowed layer or invert it through dialogos.ports."
+
+
+def module_violation_hint(imported_module: str) -> str:
+    if imported_module.startswith("dialogos.config"):
+        return "Use dialogos.adapters.storage.config_store instead."
+    if imported_module.startswith("dialogos.logging_jsonl"):
+        return "Use dialogos.adapters.storage.jsonl_turn_logger instead."
+    if imported_module.startswith("dialogos.tmux_picker"):
+        return "Use dialogos.adapters.tmux.target_resolver instead."
+    if imported_module.startswith("dialogos.orchestrator"):
+        return "Use dialogos.application.use_cases modules instead."
+    if imported_module.startswith("dialogos.contracts"):
+        return "Use dialogos.ports contracts instead."
+    if imported_module.startswith("dialogos.adapters.tmux_sender"):
+        return "Use dialogos.adapters.tmux.sender instead."
+    return "Use canonical layered modules and avoid forbidden compatibility paths."
 
 
 def print_report(
@@ -344,16 +390,35 @@ def print_report(
         print(f"Architecture check failed: {len(violations)} violation(s):", file=sys.stderr)
         for violation in violations:
             location = format_path(violation.file_path, project_root)
+            if violation.violation_type == "layer":
+                assert violation.target_layer is not None
+                print(
+                    (
+                        f"- {location}:{violation.line}:{violation.column}: "
+                        f"{violation.source_layer} -> {violation.target_layer} is forbidden "
+                        f"(import '{violation.imported_module}')"
+                    ),
+                    file=sys.stderr,
+                )
+                print(
+                    (
+                        "  Fix: "
+                        f"{layer_violation_hint(violation.source_layer, violation.target_layer)}"
+                    ),
+                    file=sys.stderr,
+                )
+                continue
+
             print(
                 (
                     f"- {location}:{violation.line}:{violation.column}: "
-                    f"{violation.source_layer} -> {violation.target_layer} is forbidden "
-                    f"(import '{violation.imported_module}')"
+                    f"{violation.source_layer} imports forbidden module "
+                    f"'{violation.imported_module}'"
                 ),
                 file=sys.stderr,
             )
             print(
-                f"  Fix: {violation_hint(violation.source_layer, violation.target_layer)}",
+                f"  Fix: {module_violation_hint(violation.imported_module)}",
                 file=sys.stderr,
             )
 

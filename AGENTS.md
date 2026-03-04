@@ -12,7 +12,8 @@ Mandatory bootstrap pack for every new session:
 1. `AGENTS.md`
 2. `docs/dev/patterns-quickstart.md`
 3. `docs/dev/dependency-rules.md`
-4. `docs/agents/new-session-handoff.md`
+4. `docs/dev/business-rules.md`
+5. `docs/agents/new-session-handoff.md`
 
 On-demand pack (read only when needed for the task):
 - `docs/dev/patterns-deep-dive.md`
@@ -34,10 +35,11 @@ Session-lead rule:
 1. Start from `specs/<feature>.md` (create/update first).
 2. Implement inside layer boundaries (`ui -> application -> domain`, application via ports).
 3. Use `make test-arch` for fast boundary validation while developing.
-4. Run `make gate` before push (blocking).
-5. Quality reviews architecture fit and gate evidence.
-6. Docs updates all impacted docs.
-7. Merge only with quality signoff.
+4. Use `make test-rules-fast` for fast business-rule regressions while developing.
+5. Run `make gate` before push (blocking).
+6. Quality reviews architecture fit and gate evidence.
+7. Docs updates all impacted docs.
+8. Merge only with quality signoff.
 
 ## Branch rules
 - `feat/<slug>`
@@ -61,6 +63,9 @@ Use Conventional Commits only:
 - Install dev deps: `make install-dev`
 - Install hooks: `make hooks`
 - Architecture checks: `make test-arch`
+- Business-rule mapping checks: `make check-rules`
+- Fast business-rule regressions: `make test-rules-fast`
+- Full business-rule regressions: `make test-rules`
 - Quality checks: `make check`
 - Fast tests (no hardware): `make test-fast`
 - Full gate (blocking): `make gate`

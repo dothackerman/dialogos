@@ -1,0 +1,109 @@
+version = 1
+
+[[rule]]
+id = "BR-TARGET-001"
+statement = "Target resolution precedence is CLI > env > remembered config > interactive picker."
+owner_layer = "application"
+requires_hardware = false
+tests = [
+  "tests/unit/test_cli_helpers.py::test_resolve_tmux_target_prefers_cli",
+  "tests/unit/test_cli_helpers.py::test_resolve_tmux_target_uses_env_when_available",
+  "tests/unit/test_cli_helpers.py::test_resolve_tmux_target_falls_back_to_picker_for_invalid_config",
+  "tests/integration/test_fake_turn_flow.py::test_remembered_target_reuse_and_cli_override",
+]
+
+[[rule]]
+id = "BR-TMUX-001"
+statement = "When tmux is unavailable, target resolution reports no-session and guidance is available."
+owner_layer = "adapters"
+requires_hardware = false
+tests = [
+  "tests/unit/test_tmux_picker.py::test_list_panes_raises_when_no_tmux_session",
+  "tests/unit/test_tmux_picker.py::test_print_no_tmux_guidance_outputs_expected_steps",
+]
+
+[[rule]]
+id = "BR-TURN-001"
+statement = "Normal mode sends transcript directly after transcription."
+owner_layer = "application"
+requires_hardware = false
+tests = [
+  "tests/integration/test_fake_turn_flow.py::test_end_to_end_fake_turn_direct_send_without_preview",
+]
+
+[[rule]]
+id = "BR-TURN-002"
+statement = "Preview mode keeps send/edit/retry/skip/quit behavior deterministic."
+owner_layer = "domain"
+requires_hardware = false
+tests = [
+  "tests/unit/test_orchestrator.py::test_confirm_actions_preview_mode_explicit_send",
+  "tests/integration/test_fake_turn_flow.py::test_end_to_end_fake_turn_preview_send_edit_retry_skip",
+]
+
+[[rule]]
+id = "BR-TURN-003"
+statement = "Empty transcript does not send text and is treated as skip."
+owner_layer = "application"
+requires_hardware = false
+tests = [
+  "tests/integration/test_fake_turn_flow.py::test_end_to_end_fake_turn_direct_empty_transcript_skips_send",
+]
+
+[[rule]]
+id = "BR-SEND-001"
+statement = "Direct-send failures do not block the next turn."
+owner_layer = "application"
+requires_hardware = false
+tests = [
+  "tests/integration/test_fake_turn_flow.py::test_direct_send_failure_does_not_block_next_turn",
+]
+
+[[rule]]
+id = "BR-STORAGE-001"
+statement = "Config persistence round-trips target state and defaults correctly when missing."
+owner_layer = "adapters"
+requires_hardware = false
+tests = [
+  "tests/contracts/test_config_store_contract.py::test_config_store_contract_round_trip",
+  "tests/contracts/test_config_store_contract.py::test_config_store_contract_missing_file_returns_default",
+]
+
+[[rule]]
+id = "BR-STORAGE-002"
+statement = "Turn logger appends JSONL events with expected schema fields."
+owner_layer = "adapters"
+requires_hardware = false
+tests = [
+  "tests/contracts/test_turn_logger_contract.py::test_turn_logger_contract_appends_jsonl_events",
+]
+
+[[rule]]
+id = "BR-STT-001"
+statement = "CUDA runtime failure detection remains stable for fallback decision logic."
+owner_layer = "adapters"
+requires_hardware = false
+tests = [
+  "tests/unit/test_cli_helpers.py::test_is_cuda_runtime_missing_true",
+  "tests/unit/test_cli_helpers.py::test_is_cuda_runtime_missing_false",
+]
+
+[[rule]]
+id = "BR-DIAG-001"
+statement = "Doctor diagnostics report missing binaries and complete successfully."
+owner_layer = "ui"
+requires_hardware = false
+tests = [
+  "tests/unit/test_runtime_checks.py::test_run_doctor_reports_missing_binaries",
+  "tests/unit/test_runtime_checks.py::test_require_binary_exits_with_guidance_when_missing",
+]
+
+[[rule]]
+id = "BR-HW-001"
+statement = "Local hardware checks validate arecord availability and tmux send smoke behavior."
+owner_layer = "adapters"
+requires_hardware = true
+tests = [
+  "tests/hardware/test_hardware_requirements.py::test_arecord_detects_capture_device",
+  "tests/hardware/test_hardware_requirements.py::test_tmux_send_smoke_to_temp_pane",
+]

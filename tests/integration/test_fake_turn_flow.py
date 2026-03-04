@@ -162,6 +162,21 @@ def test_end_to_end_fake_turn_direct_send_without_preview(tmp_path: Path) -> Non
     assert sender.messages == ["integration transcript"]
 
 
+def test_end_to_end_fake_turn_direct_empty_transcript_skips_send(tmp_path: Path) -> None:
+    sender = SenderAdapter()
+    orchestrator = FakeOrchestrator(
+        capture=CaptureAdapter(),
+        stt=SttAdapter([""]),
+        sender=sender,
+    )
+
+    action, sent_text = run_fake_turn_direct(orchestrator=orchestrator, tmp_path=tmp_path)
+
+    assert action == "skip"
+    assert sent_text is None
+    assert sender.messages == []
+
+
 def test_end_to_end_fake_turn_preview_send_edit_retry_skip(tmp_path: Path) -> None:
     # send
     sender = SenderAdapter()
@@ -230,6 +245,23 @@ def test_end_to_end_fake_turn_preview_send_edit_retry_skip(tmp_path: Path) -> No
         edit_inputs=[],
     )
     assert action == "skip"
+    assert sent_text is None
+    assert sender.messages == []
+
+    # quit
+    sender = SenderAdapter()
+    quit_orchestrator = FakeOrchestrator(
+        capture=CaptureAdapter(),
+        stt=SttAdapter(["anything"]),
+        sender=sender,
+    )
+    action, sent_text = run_fake_turn_preview(
+        orchestrator=quit_orchestrator,
+        tmp_path=tmp_path,
+        decision_inputs=["q"],
+        edit_inputs=[],
+    )
+    assert action == "quit"
     assert sent_text is None
     assert sender.messages == []
 

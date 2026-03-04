@@ -1,5 +1,5 @@
 # ruff: noqa: I001
-from dialogos.cli import main
+from .ui.cli.main import main
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-dialogos = "dialogos.cli:main"
+dialogos = "dialogos.ui.cli.main:main"
 
 [tool.ruff]
 line-length = 100

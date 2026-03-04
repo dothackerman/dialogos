@@ -1,6 +1,7 @@
 root_package = "dialogos"
 source_root = "src/dialogos"
 layers = ["domain", "application", "adapters", "ui", "ports"]
+forbidden_module_prefixes = ["dialogos.config"]
 
 [forbidden]
 domain = ["application", "adapters", "ui", "ports"]

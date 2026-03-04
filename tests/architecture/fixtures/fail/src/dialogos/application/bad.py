@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dialogos.adapters.tmux_sender import TmuxSender
+from dialogos.adapters.tmux.sender import TmuxSender
 
 
 def build_sender() -> TmuxSender:

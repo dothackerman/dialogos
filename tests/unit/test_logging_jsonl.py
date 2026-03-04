@@ -5,7 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from dialogos.logging_jsonl import TurnLogEvent, append_turn_log, default_log_path
+from dialogos.adapters.storage.jsonl_turn_logger import JsonlTurnLogger, default_log_path
+from dialogos.ports.storage import TurnLogEvent
 
 
 def test_default_log_path_uses_xdg(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -15,8 +16,9 @@ def test_default_log_path_uses_xdg(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_append_turn_log_writes_schema_and_appends(tmp_path: Path) -> None:
     log_file = tmp_path / "turns.jsonl"
+    logger = JsonlTurnLogger(path=log_file)
 
-    append_turn_log(
+    logger.append(
         TurnLogEvent(
             action="send",
             transcript="hello",
@@ -24,10 +26,9 @@ def test_append_turn_log_writes_schema_and_appends(tmp_path: Path) -> None:
             tmux_target="codex:0.1",
             preview=False,
             sent=True,
-        ),
-        path=log_file,
+        )
     )
-    append_turn_log(
+    logger.append(
         TurnLogEvent(
             action="skip",
             transcript="",
@@ -35,8 +36,7 @@ def test_append_turn_log_writes_schema_and_appends(tmp_path: Path) -> None:
             tmux_target="codex:0.1",
             preview=True,
             sent=False,
-        ),
-        path=log_file,
+        )
     )
 
     lines = log_file.read_text(encoding="utf-8").splitlines()

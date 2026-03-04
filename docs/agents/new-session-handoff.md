@@ -4,7 +4,8 @@
 1. `AGENTS.md`
 2. `docs/dev/patterns-quickstart.md`
 3. `docs/dev/dependency-rules.md`
-4. `docs/agents/workflow.md`
+4. `docs/dev/business-rules.md`
+5. `docs/agents/workflow.md`
 
 ## Read on-demand (task-dependent)
 1. `docs/dev/patterns-deep-dive.md`
@@ -15,10 +16,10 @@
 ## Execution rule
 - Implement exactly approved scope from the active spec.
 - Preserve MVP runtime behavior unless the spec explicitly changes behavior.
-- Run `make test-arch` and `make gate` before final push.
+- Run `make test-arch`, `make test-rules-fast`, and `make gate` before final push.
 
 Kickoff prompt for a new Codex session:
 
 ```text
-Read AGENTS.md, docs/dev/patterns-quickstart.md, and docs/dev/dependency-rules.md first. Then execute the assigned scope and keep layer boundaries strict.
+Read AGENTS.md, docs/dev/patterns-quickstart.md, docs/dev/dependency-rules.md, and docs/dev/business-rules.md first. Then execute the assigned scope and keep layer boundaries strict.
 ```
