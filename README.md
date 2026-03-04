@@ -33,6 +33,8 @@ make alpha-preview-no-run
 make alpha-reset
 ```
 
+`make alpha-preview` now defaults to a higher-quality alpha profile (`small` + `cuda` + `float16`) with automatic CPU fallback if CUDA runtime is unavailable.
+
 ## Architecture snapshot
 
 Target dependency direction is strict:

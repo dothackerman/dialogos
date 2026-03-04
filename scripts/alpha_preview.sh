@@ -20,6 +20,11 @@ for arg in "$@"; do
   fi
 done
 
+ALPHA_MODEL="${DIALOGOS_ALPHA_MODEL:-small}"
+ALPHA_DEVICE="${DIALOGOS_ALPHA_DEVICE:-cuda}"
+ALPHA_COMPUTE_TYPE="${DIALOGOS_ALPHA_COMPUTE_TYPE:-float16}"
+ALPHA_LANGUAGE="${DIALOGOS_ALPHA_LANGUAGE:-auto}"
+
 MISSING=()
 for binary in tmux arecord; do
   if ! command -v "$binary" >/dev/null 2>&1; then
@@ -57,6 +62,8 @@ echo "Python: $PYTHON"
 echo "Config path: $CONFIG_PATH"
 echo "Log path: $LOG_PATH"
 echo "Target resolution order: --tmux-target -> DIALOGOS_TMUX_TARGET -> remembered config -> picker"
+echo "Alpha default profile: model=$ALPHA_MODEL device=$ALPHA_DEVICE compute_type=$ALPHA_COMPUTE_TYPE language=$ALPHA_LANGUAGE"
+echo "(Dialogos auto-falls back to CPU int8 if CUDA runtime is unavailable.)"
 
 echo
 echo "Running diagnostics (dialogos --doctor)..."
@@ -88,11 +95,11 @@ fi
 
 echo
 echo "Launching Dialogos with alpha defaults (override by passing your own args):"
-echo "  $PYTHON -m dialogos --model base --device cpu --compute-type int8 --language auto ${FORWARD_ARGS[*]:-}"
+echo "  $PYTHON -m dialogos --model $ALPHA_MODEL --device $ALPHA_DEVICE --compute-type $ALPHA_COMPUTE_TYPE --language $ALPHA_LANGUAGE ${FORWARD_ARGS[*]:-}"
 
 exec "$PYTHON" -m dialogos \
-  --model base \
-  --device cpu \
-  --compute-type int8 \
-  --language auto \
+  --model "$ALPHA_MODEL" \
+  --device "$ALPHA_DEVICE" \
+  --compute-type "$ALPHA_COMPUTE_TYPE" \
+  --language "$ALPHA_LANGUAGE" \
   "${FORWARD_ARGS[@]}"

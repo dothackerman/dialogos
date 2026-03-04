@@ -24,16 +24,30 @@ What this does:
 - verifies `tmux` and `arecord`
 - runs `dialogos --doctor`
 - prints active config/log paths
-- launches Dialogos with alpha-safe defaults:
-  - `--model base`
-  - `--device cpu`
-  - `--compute-type int8`
+- launches Dialogos with GPU-oriented alpha defaults:
+  - `--model small`
+  - `--device cuda`
+  - `--compute-type float16`
   - `--language auto`
 
-You can override defaults:
+If CUDA runtime is not available, Dialogos falls back to CPU `int8` automatically.
+
+## Override defaults
+
+You can override by passing CLI args:
 
 ```bash
-./scripts/alpha_preview.sh --model small --language en --preview
+./scripts/alpha_preview.sh --model medium --language en --preview
+```
+
+Or set environment overrides:
+
+```bash
+export DIALOGOS_ALPHA_MODEL=medium
+export DIALOGOS_ALPHA_DEVICE=cuda
+export DIALOGOS_ALPHA_COMPUTE_TYPE=float16
+export DIALOGOS_ALPHA_LANGUAGE=auto
+make alpha-preview
 ```
 
 Dry run without launching the interactive loop:
