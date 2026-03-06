@@ -7,7 +7,7 @@ Silicato is currently in release-candidate stage.
 | Version | Supported |
 | --- | --- |
 | 0.1.x (RC and final) | Yes |
-| < 0.1.0rc1 | No |
+| 0.0.x and earlier | No |
 
 ## Reporting a vulnerability
 
