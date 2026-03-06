@@ -1,6 +1,6 @@
 # Capabilities
 
-## RC2 scope (`0.1.0rc2`)
+## RC3 scope (`0.1.0rc3`)
 
 In scope:
 - Push-to-talk speech capture with Enter start/stop
@@ -18,7 +18,7 @@ In scope:
 - Terminal agent CLI running inside tmux (for example Codex or Claude Code)
 - Silicato injects transcript text into selected tmux pane and submits the prompt
 
-## Out of scope for RC2
+## Out of scope for RC3
 
 - Always-on mode with silence segmentation
 - Spoken assistant replies (TTS)

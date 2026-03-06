@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.0rc3] - 2026-03-06
+
+### Added
+- Dedicated tmux runtime boundary adapter and contract tests for centralized tmux command construction.
+- Dedicated `make test-e2e-tmux` command for tmux hardware smoke checks.
+- New short CLI aliases for frequent options (`-m/-d/-c/-l/-r/-i/-t/-R/-n/-p/-f/-o/-D`).
+
+### Changed
+- Default target selection now opens the interactive tmux picker at startup unless an explicit target is provided.
+- Added explicit `--reuse-target` mode to restore env/config fallback target behavior.
+- Normal mode no longer prints transcript text locally; preview mode keeps transcript visibility.
+- User and developer docs aligned to new target-selection defaults and CLI aliases.
+- Bumped package version to `0.1.0rc3`.
+
 ## [0.1.0rc2] - 2026-03-06
 
 ### Changed
