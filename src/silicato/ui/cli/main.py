@@ -67,9 +67,7 @@ def main() -> int:
     resolve_target = ResolveTargetUseCase(target_resolver)
 
     try:
-        env_target = os.environ.get("SILICATO_TMUX_TARGET") or os.environ.get(
-            "DIALOGOS_TMUX_TARGET"
-        )
+        env_target = os.environ.get("SILICATO_TMUX_TARGET")
         target_result = resolve_target.execute(
             explicit_target=args.tmux_target,
             pick_target=args.pick_target,
