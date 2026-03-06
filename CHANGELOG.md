@@ -12,11 +12,11 @@ All notable changes to this project are documented in this file.
 ### Changed
 - Public-facing README and user docs aligned to locked RC scope:
   - push-to-talk + optional preview
-  - tmux + Codex CLI requirement
+  - tmux + terminal agent CLI requirement
   - official support target: TUXEDO OS 24.04 LTS
   - Ubuntu 24.04-compatible best-effort support
 - Packaging metadata hardened for public release and versioned to `0.1.0rc1`.
 - Release pipeline documentation updated for build, twine check, TestPyPI upload, and pipx install simulation.
 
 ### Fixed
-- Repository transparency around known submit-timing behavior in Codex tmux panes, including actionable bug-report data requirements.
+- Repository transparency around known submit-timing behavior in tmux agent panes, including actionable bug-report data requirements.

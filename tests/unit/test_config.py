@@ -4,24 +4,24 @@ from pathlib import Path
 
 import pytest
 
-from dialogos.adapters.storage.config_store import TomlConfigStore, default_config_path
-from dialogos.ports.storage import DialogosConfig
+from silicato.adapters.storage.config_store import TomlConfigStore, default_config_path
+from silicato.ports.storage import SilicatoConfig
 
 
 def test_default_config_path_uses_xdg(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("XDG_CONFIG_HOME", "/tmp/xdg-config")
-    assert default_config_path() == Path("/tmp/xdg-config/dialogos/config.toml")
+    assert default_config_path() == Path("/tmp/xdg-config/silicato/config.toml")
 
 
 def test_load_config_missing_returns_default(tmp_path: Path) -> None:
     config = TomlConfigStore(path=tmp_path / "missing.toml").load()
-    assert config == DialogosConfig()
+    assert config == SilicatoConfig()
 
 
 def test_save_and_load_config_roundtrip(tmp_path: Path) -> None:
     path = tmp_path / "config.toml"
     store = TomlConfigStore(path=path)
-    store.save(DialogosConfig(tmux_target="codex:0.1"))
+    store.save(SilicatoConfig(tmux_target="codex:0.1"))
     loaded = store.load()
     assert loaded.tmux_target == "codex:0.1"
 

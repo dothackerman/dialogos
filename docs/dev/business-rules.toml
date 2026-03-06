@@ -100,7 +100,7 @@ tests = [
 
 [[rule]]
 id = "BR-TMUX-002"
-statement = "Tmux sender submits prompts using split text and delayed Enter to avoid Codex TUI submit misses."
+statement = "Tmux sender submits prompts using split text and delayed Enter to avoid terminal agent TUI submit misses."
 owner_layer = "adapters"
 requires_hardware = false
 tests = [

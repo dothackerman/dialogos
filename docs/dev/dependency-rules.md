@@ -22,17 +22,17 @@ Notes:
 
 ```python
 # forbidden: application importing concrete adapter
-from dialogos.adapters.tmux.sender import TmuxSender
+from silicato.adapters.tmux.sender import TmuxSender
 ```
 
 ```python
 # forbidden: domain depending on side-effect boundary
-from dialogos.ports.sender import Sender
+from silicato.ports.sender import Sender
 ```
 
 ```python
 # forbidden: adapter calling application orchestration
-from dialogos.application.use_cases.send_turn import send_turn
+from silicato.application.use_cases.send_turn import send_turn
 ```
 
 ## Required architecture checks

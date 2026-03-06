@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from dialogos.ui.cli.runtime_checks import require_binary, run_doctor
+from silicato.ui.cli.runtime_checks import require_binary, run_doctor
 
 
 def test_require_binary_exits_with_guidance_when_missing(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setattr("dialogos.ui.cli.runtime_checks.shutil.which", lambda _: None)
+    monkeypatch.setattr("silicato.ui.cli.runtime_checks.shutil.which", lambda _: None)
 
     with pytest.raises(SystemExit, match="1"):
         require_binary("tmux", apt_package="tmux")
@@ -21,7 +21,7 @@ def test_require_binary_exits_with_guidance_when_missing(
 def test_run_doctor_reports_missing_binaries(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    monkeypatch.setattr("dialogos.ui.cli.runtime_checks.shutil.which", lambda _: None)
+    monkeypatch.setattr("silicato.ui.cli.runtime_checks.shutil.which", lambda _: None)
 
     code = run_doctor()
     captured = capsys.readouterr()

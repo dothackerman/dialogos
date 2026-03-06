@@ -2,16 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dialogos.adapters.storage.config_store import TomlConfigStore
-from dialogos.application.use_cases.resolve_target import ResolveTargetUseCase
-from dialogos.application.use_cases.run_capture_transcribe import (
+from silicato.adapters.storage.config_store import TomlConfigStore
+from silicato.application.use_cases.resolve_target import ResolveTargetUseCase
+from silicato.application.use_cases.run_capture_transcribe import (
     RunCaptureTranscribeUseCase,
     TurnConfig,
 )
-from dialogos.domain.confirm_actions import parse_confirm_action
-from dialogos.ports.storage import DialogosConfig
-from dialogos.ports.stt import TranscriptResult
-from dialogos.ports.targeting import PaneEntry
+from silicato.domain.confirm_actions import parse_confirm_action
+from silicato.ports.storage import SilicatoConfig
+from silicato.ports.stt import TranscriptResult
+from silicato.ports.targeting import PaneEntry
 
 
 class CaptureAdapter:
@@ -287,7 +287,7 @@ def test_direct_send_failure_does_not_block_next_turn(tmp_path: Path) -> None:
 def test_remembered_target_reuse_and_cli_override(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     config_store = TomlConfigStore(path=config_path)
-    config_store.save(DialogosConfig(tmux_target="remembered:0.1"))
+    config_store.save(SilicatoConfig(tmux_target="remembered:0.1"))
     loaded = config_store.load()
     assert loaded.tmux_target == "remembered:0.1"
 

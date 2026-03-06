@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from dialogos.adapters.tmux.sender import TmuxSender
+from silicato.adapters.tmux.sender import TmuxSender
 
 
 def test_tmux_sender_contract_sends_message(monkeypatch: pytest.MonkeyPatch) -> None:

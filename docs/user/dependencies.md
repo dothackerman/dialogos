@@ -11,7 +11,7 @@ Best effort:
 Validated baseline:
 - Python 3.12.3
 - tmux 3.4
-- Codex CLI 0.107.0
+- Agent CLI (for example Codex CLI or Claude Code)
 
 ## System runtime dependencies
 
@@ -63,5 +63,5 @@ Transcription still runs locally.
 
 ## tmux behavior requirement
 
-Dialogos validates tmux target availability before sending.
-If no tmux session exists, Dialogos prints setup guidance and exits non-zero.
+Silicato validates tmux target availability before sending.
+If no tmux session exists, Silicato prints setup guidance and exits non-zero.

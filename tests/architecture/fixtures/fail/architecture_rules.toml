@@ -1,7 +1,7 @@
-root_package = "dialogos"
-source_root = "src/dialogos"
+root_package = "silicato"
+source_root = "src/silicato"
 layers = ["domain", "application", "adapters", "ui", "ports"]
-forbidden_module_prefixes = ["dialogos.config"]
+forbidden_module_prefixes = ["silicato.config"]
 
 [forbidden]
 domain = ["application", "adapters", "ui", "ports"]

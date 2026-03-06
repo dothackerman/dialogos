@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Backward-compatible entrypoint for the Dialogos CLI."""
+"""Backward-compatible entrypoint for the Silicato CLI."""
 
 from __future__ import annotations
 
@@ -13,9 +13,9 @@ def main() -> int:
     if str(src) not in sys.path:
         sys.path.insert(0, str(src))
 
-    from dialogos.ui.cli.main import main as dialogos_main
+    from silicato.ui.cli.main import main as silicato_main
 
-    return dialogos_main()
+    return silicato_main()
 
 
 if __name__ == "__main__":

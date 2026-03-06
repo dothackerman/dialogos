@@ -15,20 +15,20 @@ if [[ "${1:-}" == "--yes" ]]; then
   ASSUME_YES=1
 fi
 
-if ! "$PYTHON" -c 'import dialogos' >/dev/null 2>&1; then
-  echo "Dialogos package is not installed in the active environment." >&2
+if ! "$PYTHON" -c 'import silicato' >/dev/null 2>&1; then
+  echo "Silicato package is not installed in the active environment." >&2
   echo "Run: make install-dev" >&2
   exit 1
 fi
 
 CONFIG_PATH="$($PYTHON - <<'PY'
-from dialogos.adapters.storage.config_store import default_config_path
+from silicato.adapters.storage.config_store import default_config_path
 print(default_config_path())
 PY
 )"
 
 LOG_PATH="$($PYTHON - <<'PY'
-from dialogos.adapters.storage.jsonl_turn_logger import default_log_path
+from silicato.adapters.storage.jsonl_turn_logger import default_log_path
 print(default_log_path())
 PY
 )"

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Dialogos is currently in release-candidate stage.
+Silicato is currently in release-candidate stage.
 
 | Version | Supported |
 | --- | --- |
@@ -20,7 +20,7 @@ Preferred process:
 
 Include:
 - affected version
-- environment details (OS, Python, tmux, Codex CLI)
+- environment details (OS, Python, tmux, agent CLI)
 - reproduction steps or proof of concept
 - impact assessment
 - suggested mitigation (if available)

@@ -1,6 +1,6 @@
 # Business Rules
 
-This document defines how Dialogos tracks and validates behavior regressions using a rule catalog.
+This document defines how Silicato tracks and validates behavior regressions using a rule catalog.
 
 ## Source of truth
 

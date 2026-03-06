@@ -6,8 +6,8 @@ from contextlib import contextmanager
 
 import pytest
 
-from dialogos.adapters.tmux.target_resolver import TmuxTargetResolver
-from dialogos.ports.targeting import (
+from silicato.adapters.tmux.target_resolver import TmuxTargetResolver
+from silicato.ports.targeting import (
     InvalidTmuxTargetError,
     NoTmuxSessionError,
     PaneEntry,
@@ -100,6 +100,6 @@ def test_print_no_tmux_guidance_outputs_expected_steps() -> None:
     assert lines == [
         "No tmux session is running.",
         "Start one with:",
-        "  tmux new -s codex",
-        "Then start Codex in that session and rerun Dialogos.",
+        "  tmux new -s agent",
+        "Then start your agent CLI (for example Codex or Claude Code) and rerun Silicato.",
     ]

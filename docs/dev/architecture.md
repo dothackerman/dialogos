@@ -1,9 +1,9 @@
 # Architecture
 
 ## Product name
-Dialogos.
+Silicato.
 
-Intent: enable a local-first communication channel between human speech and Codex text workflows.
+Intent: enable a local-first communication channel between human speech and terminal AI-agent text workflows.
 
 ## Runtime posture
 - Local-first and offline-capable after model download
@@ -13,27 +13,27 @@ Intent: enable a local-first communication channel between human speech and Code
 
 ## Layered architecture target
 
-### `src/dialogos/domain/`
+### `src/silicato/domain/`
 - Pure business state and transitions (no side effects)
 - Owns turn state machine and confirm action semantics
 - No filesystem/subprocess/env/terminal/network imports
 
-### `src/dialogos/application/`
+### `src/silicato/application/`
 - Use-case orchestration for turn flow
 - Coordinates domain decisions and port calls
 - May import `domain` and `ports`, never adapters
 
-### `src/dialogos/ports/`
+### `src/silicato/ports/`
 - Typed interfaces for external capabilities
 - Examples: audio capture, STT, sender, target resolver, config store, turn logger
 
-### `src/dialogos/adapters/`
+### `src/silicato/adapters/`
 - Concrete side-effect implementations (tmux, ALSA, whisper, storage)
 - Implements `ports` contracts
 
-### `src/dialogos/ui/`
+### `src/silicato/ui/`
 - CLI argument parsing, prompts, output rendering, and dependency wiring
-- Entry points stay `dialogos` and `python3 -m dialogos`
+- Entry points stay `silicato` and `python3 -m silicato`
 - May compose adapters and call application use-cases
 
 ## Dependency direction (strict)
@@ -52,7 +52,7 @@ Forbidden:
 - `ui -> domain`
 
 ## Turn behavior (unchanged)
-1. Resolve tmux target (`--tmux-target` -> `DIALOGOS_TMUX_TARGET` -> remembered target -> picker)
+1. Resolve tmux target (`--tmux-target` -> `SILICATO_TMUX_TARGET` -> remembered target -> picker)
 2. Validate target
 3. Capture push-to-talk audio
 4. Transcribe locally

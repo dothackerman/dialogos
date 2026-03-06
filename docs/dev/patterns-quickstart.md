@@ -43,6 +43,6 @@ Allowed dependency flow:
 ## Fast start checklist
 
 1. Read this file, `docs/dev/dependency-rules.md`, and `docs/dev/business-rules.md`.
-2. Open only the touched layer README under `src/dialogos/<layer>/README.md`.
+2. Open only the touched layer README under `src/silicato/<layer>/README.md`.
 3. Implement in the lowest valid layer.
 4. Add or update tests in the expected test category.

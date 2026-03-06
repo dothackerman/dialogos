@@ -79,10 +79,10 @@ python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ## pipx validation from TestPyPI
 
 ```bash
-pipx install --index-url https://test.pypi.org/simple --pip-args='--extra-index-url https://pypi.org/simple' dialogos==0.1.0rc1
+pipx install --index-url https://test.pypi.org/simple --pip-args='--extra-index-url https://pypi.org/simple' silicato==0.1.0rc1
 
-dialogos --doctor
-dialogos --help
+silicato --doctor
+silicato --help
 ```
 
 ## Manual UX acceptance

@@ -24,7 +24,7 @@ def test_tmux_available() -> None:
 def test_tmux_send_smoke_to_temp_pane() -> None:
     assert shutil.which("tmux"), "tmux not found; install tmux."
 
-    session_name = f"dialogos-smoke-{os.getpid()}"
+    session_name = f"silicato-smoke-{os.getpid()}"
     pane_target = f"{session_name}:0.0"
 
     try:
@@ -36,7 +36,7 @@ def test_tmux_send_smoke_to_temp_pane() -> None:
         )
         assert create.returncode == 0, create.stderr or create.stdout
 
-        payload = "dialogos-hardware-smoke"
+        payload = "silicato-hardware-smoke"
         send = subprocess.run(
             ["tmux", "send-keys", "-t", pane_target, payload, "C-m"],
             capture_output=True,

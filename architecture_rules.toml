@@ -1,13 +1,13 @@
-root_package = "dialogos"
-source_root = "src/dialogos"
+root_package = "silicato"
+source_root = "src/silicato"
 layers = ["domain", "application", "adapters", "ui", "ports"]
 forbidden_module_prefixes = [
-  "dialogos.config",
-  "dialogos.logging_jsonl",
-  "dialogos.tmux_picker",
-  "dialogos.orchestrator",
-  "dialogos.contracts",
-  "dialogos.adapters.tmux_sender",
+  "silicato.config",
+  "silicato.logging_jsonl",
+  "silicato.tmux_picker",
+  "silicato.orchestrator",
+  "silicato.contracts",
+  "silicato.adapters.tmux_sender",
 ]
 
 [forbidden]

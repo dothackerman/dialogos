@@ -1,6 +1,6 @@
 # Agent Roles
 
-Dialogos uses a 3-role multi-agent model.
+Silicato uses a 3-role multi-agent model.
 
 ## 1) Builder Agent
 - Implements feature code and tests from spec.

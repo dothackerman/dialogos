@@ -1,4 +1,4 @@
-# Dialogos Agent Playbook
+# Silicato Agent Playbook
 
 This file defines how agents collaborate in this repository.
 
@@ -18,7 +18,7 @@ Mandatory bootstrap pack for every new session:
 On-demand pack (read only when needed for the task):
 - `docs/dev/patterns-deep-dive.md`
 - `docs/dev/adr/*`
-- `src/dialogos/<layer>/README.md` for touched layer(s)
+- `src/silicato/<layer>/README.md` for touched layer(s)
 - `specs/milestone-2-architecture.md` for migration details
 
 Session-lead rule:

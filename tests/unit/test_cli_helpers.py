@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dialogos.adapters.stt.whisper import is_cuda_runtime_missing
-from dialogos.application.use_cases.resolve_target import ResolveTargetUseCase
-from dialogos.ports.targeting import InvalidTmuxTargetError, PaneEntry
+from silicato.adapters.stt.whisper import is_cuda_runtime_missing
+from silicato.application.use_cases.resolve_target import ResolveTargetUseCase
+from silicato.ports.targeting import InvalidTmuxTargetError, PaneEntry
 
 
 class FakeTargetResolver:

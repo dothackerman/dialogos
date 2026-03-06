@@ -4,8 +4,8 @@ import subprocess
 
 import pytest
 
-from dialogos.adapters.tmux.target_resolver import TmuxTargetResolver
-from dialogos.ports.targeting import (
+from silicato.adapters.tmux.target_resolver import TmuxTargetResolver
+from silicato.ports.targeting import (
     InvalidTmuxTargetError,
     NoTmuxSessionError,
     PaneEntry,

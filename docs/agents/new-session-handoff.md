@@ -10,7 +10,7 @@
 ## Read on-demand (task-dependent)
 1. `docs/dev/patterns-deep-dive.md`
 2. `docs/dev/adr/README.md` and related ADR file(s)
-3. `src/dialogos/<layer>/README.md` for touched layer(s)
+3. `src/silicato/<layer>/README.md` for touched layer(s)
 4. `specs/milestone-2-architecture.md` for migration context
 
 ## Execution rule

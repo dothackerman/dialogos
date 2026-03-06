@@ -10,13 +10,13 @@ In scope:
 - Normal mode direct send after transcription
 - Preview mode (`--preview`) with `send/edit/retry/skip/quit`
 - Local JSONL turn logs
-- Runtime diagnostics (`dialogos --doctor`)
+- Runtime diagnostics (`silicato --doctor`)
 
 ## Required runtime model
 
 - Linux terminal workflow
-- Codex CLI running inside tmux
-- Dialogos injects transcript text into selected tmux pane and submits the prompt
+- Terminal agent CLI running inside tmux (for example Codex or Claude Code)
+- Silicato injects transcript text into selected tmux pane and submits the prompt
 
 ## Out of scope for RC1
 

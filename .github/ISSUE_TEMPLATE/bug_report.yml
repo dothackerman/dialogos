@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible Dialogos bug
+description: Report a reproducible Silicato bug
 title: "[Bug]: "
 labels:
   - bug
@@ -11,7 +11,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Dialogos version
+      label: Silicato version
       description: Example: 0.1.0rc1
       placeholder: 0.1.0rc1
     validations:
@@ -41,11 +41,11 @@ body:
     validations:
       required: true
   - type: input
-    id: codex_cli
+    id: agent_cli
     attributes:
-      label: Codex CLI version
+      label: Agent CLI and version
       description: Required
-      placeholder: codex-cli 0.107.0
+      placeholder: codex-cli 0.107.0 or claude-code <version>
     validations:
       required: true
   - type: textarea
@@ -55,8 +55,8 @@ body:
       description: Required. Include every command/key press needed.
       placeholder: |
         1. Start tmux session...
-        2. Run codex...
-        3. Run dialogos...
+        2. Run agent CLI...
+        3. Run silicato...
     validations:
       required: true
   - type: textarea

@@ -18,7 +18,7 @@ This file stores ideas intentionally deferred beyond Milestone 1.
 - Domain vocabulary injection and normalization rules
 - Swiss-German post-processing experiments
 
-## tmux/Codex integration
+## tmux/agent integration
 - Reply scraping robustness across terminal layouts
 - Turn-level timeout policy
 - Session auto-discovery heuristics beyond current picker

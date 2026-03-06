@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate layered import boundaries for the Dialogos codebase."""
+"""Validate layered import boundaries for the Silicato codebase."""
 
 from __future__ import annotations
 
@@ -344,27 +344,27 @@ def format_path(path: Path, base: Path) -> str:
 
 def layer_violation_hint(source_layer: str, target_layer: str) -> str:
     if source_layer == "application" and target_layer == "adapters":
-        return "Depend on a contract in dialogos.ports and inject the adapter from dialogos.ui."
+        return "Depend on a contract in silicato.ports and inject the adapter from silicato.ui."
     if source_layer == "ui" and target_layer == "domain":
         return "Call an application use-case instead of importing domain internals directly."
     if target_layer == "ui":
-        return "Move CLI concerns out of lower layers and keep them in dialogos.ui."
-    return "Move the dependency to an allowed layer or invert it through dialogos.ports."
+        return "Move CLI concerns out of lower layers and keep them in silicato.ui."
+    return "Move the dependency to an allowed layer or invert it through silicato.ports."
 
 
 def module_violation_hint(imported_module: str) -> str:
-    if imported_module.startswith("dialogos.config"):
-        return "Use dialogos.adapters.storage.config_store instead."
-    if imported_module.startswith("dialogos.logging_jsonl"):
-        return "Use dialogos.adapters.storage.jsonl_turn_logger instead."
-    if imported_module.startswith("dialogos.tmux_picker"):
-        return "Use dialogos.adapters.tmux.target_resolver instead."
-    if imported_module.startswith("dialogos.orchestrator"):
-        return "Use dialogos.application.use_cases modules instead."
-    if imported_module.startswith("dialogos.contracts"):
-        return "Use dialogos.ports contracts instead."
-    if imported_module.startswith("dialogos.adapters.tmux_sender"):
-        return "Use dialogos.adapters.tmux.sender instead."
+    if imported_module.startswith("silicato.config"):
+        return "Use silicato.adapters.storage.config_store instead."
+    if imported_module.startswith("silicato.logging_jsonl"):
+        return "Use silicato.adapters.storage.jsonl_turn_logger instead."
+    if imported_module.startswith("silicato.tmux_picker"):
+        return "Use silicato.adapters.tmux.target_resolver instead."
+    if imported_module.startswith("silicato.orchestrator"):
+        return "Use silicato.application.use_cases modules instead."
+    if imported_module.startswith("silicato.contracts"):
+        return "Use silicato.ports contracts instead."
+    if imported_module.startswith("silicato.adapters.tmux_sender"):
+        return "Use silicato.adapters.tmux.sender instead."
     return "Use canonical layered modules and avoid forbidden compatibility paths."
 
 

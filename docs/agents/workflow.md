@@ -33,7 +33,7 @@ Mandatory bootstrap docs for every session:
 On-demand docs:
 - `docs/dev/patterns-deep-dive.md`
 - `docs/dev/adr/*`
-- `src/dialogos/<layer>/README.md` for touched layer(s)
+- `src/silicato/<layer>/README.md` for touched layer(s)
 
 ## Spec lifecycle
 

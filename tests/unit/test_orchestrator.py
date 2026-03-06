@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dialogos.application.use_cases.run_capture_transcribe import (
+from silicato.application.use_cases.run_capture_transcribe import (
     RunCaptureTranscribeUseCase,
     TurnConfig,
 )
-from dialogos.application.use_cases.send_turn import SendTurnUseCase
-from dialogos.domain.confirm_actions import parse_confirm_action
-from dialogos.ports.stt import TranscriptResult
+from silicato.application.use_cases.send_turn import SendTurnUseCase
+from silicato.domain.confirm_actions import parse_confirm_action
+from silicato.ports.stt import TranscriptResult
 
 
 class FakeCapture:

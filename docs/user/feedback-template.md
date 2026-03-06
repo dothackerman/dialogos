@@ -1,6 +1,6 @@
 # Feedback Template (Alpha Preview)
 
-Use this template while playing with Dialogos. Keep it short and concrete.
+Use this template while playing with Silicato. Keep it short and concrete.
 
 ## Context
 - Date/time:

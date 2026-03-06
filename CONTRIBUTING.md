@@ -1,13 +1,13 @@
 # Contributing
 
-Thanks for contributing to Dialogos.
+Thanks for contributing to Silicato.
 
 ## Scope and support policy
 
 Please keep contributions aligned with current release scope:
 - push-to-talk transcription flow
 - optional preview mode (`--preview`)
-- tmux + Codex CLI transport model
+- tmux + terminal agent CLI transport model
 
 Support policy:
 - Official: TUXEDO OS 24.04 LTS
@@ -95,7 +95,7 @@ Do not import adapters from application/domain.
   - OS and version
   - terminal emulator
   - tmux version
-  - Codex CLI version
+  - agent CLI + version
   - exact reproduction steps
 
 ## Security issues

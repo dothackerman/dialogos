@@ -34,12 +34,12 @@ def test_architecture_checker_reports_forbidden_imports() -> None:
 
     assert result.returncode == 1
     assert "Architecture check failed" in result.stderr
-    assert "src/dialogos/application/bad.py" in result.stderr
-    assert "src/dialogos/domain/bad.py" in result.stderr
-    assert "src/dialogos/ui/bad.py" in result.stderr
-    assert "src/dialogos/ui/legacy_import.py" in result.stderr
+    assert "src/silicato/application/bad.py" in result.stderr
+    assert "src/silicato/domain/bad.py" in result.stderr
+    assert "src/silicato/ui/bad.py" in result.stderr
+    assert "src/silicato/ui/legacy_import.py" in result.stderr
     assert "application -> adapters" in result.stderr
     assert "domain -> application" in result.stderr
     assert "ui -> domain" in result.stderr
-    assert "imports forbidden module 'dialogos.config.DialogosConfig'" in result.stderr
+    assert "imports forbidden module 'silicato.config.SilicatoConfig'" in result.stderr
     assert "Fix:" in result.stderr

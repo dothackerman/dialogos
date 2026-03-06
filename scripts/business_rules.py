@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and execute Dialogos business-rule regression mappings."""
+"""Validate and execute Silicato business-rule regression mappings."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
-# Dialogos
+# Silicato
 
-Dialogos is a Linux voice bridge from push-to-talk microphone input to a selected Codex tmux pane.
+Silicato is a Linux voice bridge from push-to-talk microphone input to a selected AI-agent tmux pane.
 
 Current release candidate: `0.1.0rc1`.
 
@@ -13,14 +13,14 @@ Validated baseline for this RC:
 - OS: TUXEDO OS 24.04.4 LTS
 - Python: 3.12.3
 - tmux: 3.4
-- Codex CLI: 0.107.0
+- Agent CLIs: Codex CLI 0.107.0 and Claude Code (manual validation)
 
 ## Release Scope
 
 `0.1.0rc1` is intentionally limited to the current feature set:
 - Push-to-talk transcription flow
 - Optional preview mode (`--preview`) for `send/edit/retry/skip/quit`
-- Required tmux + Codex CLI workflow
+- Required tmux + terminal agent CLI workflow
 - Existing target resolution, config persistence, JSONL logging, and doctor diagnostics
 
 Out of scope for this RC:
@@ -36,13 +36,13 @@ Out of scope for this RC:
 - tmux pane target selection with persisted default target
 - Normal mode: direct send after transcription
 - Preview mode: review/edit/retry/skip/quit before send
-- Runtime diagnostics via `dialogos --doctor`
+- Runtime diagnostics via `silicato --doctor`
 - Local JSONL turn logging
 
 ## Limitations
 
 - Linux and tmux are mandatory
-- Codex CLI must run in a tmux pane
+- A terminal agent CLI (for example Codex or Claude Code) must run in a tmux pane
 - No always-on listening mode
 - No spoken output mode
 - Turn logs may contain transcript text and stay local on disk
@@ -52,7 +52,7 @@ Out of scope for this RC:
 ### RC install from TestPyPI (recommended for `0.1.0rc1` validation)
 
 ```bash
-pipx install --index-url https://test.pypi.org/simple --pip-args='--extra-index-url https://pypi.org/simple' dialogos==0.1.0rc1
+pipx install --index-url https://test.pypi.org/simple --pip-args='--extra-index-url https://pypi.org/simple' silicato==0.1.0rc1
 ```
 
 ### Source install
@@ -67,7 +67,7 @@ make install-dev
 ### Final release install (after `0.1.0` publish)
 
 ```bash
-pipx install dialogos
+pipx install silicato
 ```
 
 ## Quick Start
@@ -82,35 +82,35 @@ sudo apt install -y alsa-utils ffmpeg python3-venv tmux
 Run diagnostics:
 
 ```bash
-dialogos --doctor
+silicato --doctor
 ```
 
 Run normal mode:
 
 ```bash
-dialogos
+silicato
 ```
 
 Run preview mode:
 
 ```bash
-dialogos --preview
+silicato --preview
 ```
 
 Normal mode sends directly after transcription. Preview mode requires explicit confirmation.
 
 ## Known Issues
 
-### Codex submit timing in tmux
+### Agent submit timing in tmux
 
 Status:
-- Dialogos mitigates this by splitting text send and submit key send with a short delay.
-- The issue has been observed with Codex CLI in tmux on Linux.
+- Silicato mitigates this by splitting text send and submit key send with a short delay.
+- The issue has been observed with terminal agent UIs in tmux on Linux.
 
 Symptom:
-- Transcript text appears in Codex input but is not submitted until manual Enter.
+- Transcript text appears in the agent input but is not submitted until manual Enter.
 
-Current mitigation in Dialogos:
+Current mitigation in Silicato:
 1. Send transcript text first.
 2. Wait briefly.
 3. Send Enter as a separate tmux operation.
@@ -119,7 +119,7 @@ If you still see this behavior, open a bug report and include:
 - OS distribution and version
 - terminal emulator
 - tmux version
-- Codex CLI version
+- Agent CLI + version (for example Codex CLI or Claude Code)
 - exact reproduction steps
 
 ## Commands

@@ -20,13 +20,13 @@ for arg in "$@"; do
   fi
 done
 
-ALPHA_MODEL="${DIALOGOS_ALPHA_MODEL:-small}"
-ALPHA_DEVICE="${DIALOGOS_ALPHA_DEVICE:-cuda}"
-ALPHA_COMPUTE_TYPE="${DIALOGOS_ALPHA_COMPUTE_TYPE:-float16}"
-ALPHA_LANGUAGE="${DIALOGOS_ALPHA_LANGUAGE:-auto}"
+ALPHA_MODEL="${SILICATO_ALPHA_MODEL:-${DIALOGOS_ALPHA_MODEL:-small}}"
+ALPHA_DEVICE="${SILICATO_ALPHA_DEVICE:-${DIALOGOS_ALPHA_DEVICE:-cuda}}"
+ALPHA_COMPUTE_TYPE="${SILICATO_ALPHA_COMPUTE_TYPE:-${DIALOGOS_ALPHA_COMPUTE_TYPE:-float16}}"
+ALPHA_LANGUAGE="${SILICATO_ALPHA_LANGUAGE:-${DIALOGOS_ALPHA_LANGUAGE:-auto}}"
 
-if [[ -n "${DIALOGOS_ALPHA_HF_TOKEN:-}" && -z "${HF_TOKEN:-}" ]]; then
-  export HF_TOKEN="$DIALOGOS_ALPHA_HF_TOKEN"
+if [[ -n "${SILICATO_ALPHA_HF_TOKEN:-${DIALOGOS_ALPHA_HF_TOKEN:-}}" && -z "${HF_TOKEN:-}" ]]; then
+  export HF_TOKEN="${SILICATO_ALPHA_HF_TOKEN:-${DIALOGOS_ALPHA_HF_TOKEN:-}}"
 fi
 
 MISSING=()
@@ -42,32 +42,32 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
   exit 1
 fi
 
-if ! "$PYTHON" -c 'import dialogos' >/dev/null 2>&1; then
-  echo "Dialogos package is not installed in the active environment." >&2
+if ! "$PYTHON" -c 'import silicato' >/dev/null 2>&1; then
+  echo "Silicato package is not installed in the active environment." >&2
   echo "Run: make install-dev" >&2
   exit 1
 fi
 
 CONFIG_PATH="$($PYTHON - <<'PY'
-from dialogos.adapters.storage.config_store import default_config_path
+from silicato.adapters.storage.config_store import default_config_path
 print(default_config_path())
 PY
 )"
 
 LOG_PATH="$($PYTHON - <<'PY'
-from dialogos.adapters.storage.jsonl_turn_logger import default_log_path
+from silicato.adapters.storage.jsonl_turn_logger import default_log_path
 print(default_log_path())
 PY
 )"
 
-echo "== Dialogos Alpha Preview =="
+echo "== Silicato Alpha Preview =="
 echo "Project root: $ROOT_DIR"
 echo "Python: $PYTHON"
 echo "Config path: $CONFIG_PATH"
 echo "Log path: $LOG_PATH"
-echo "Target resolution order: --tmux-target -> DIALOGOS_TMUX_TARGET -> remembered config -> picker"
+echo "Target resolution order: --tmux-target -> SILICATO_TMUX_TARGET -> remembered config -> picker"
 echo "Alpha default profile: model=$ALPHA_MODEL device=$ALPHA_DEVICE compute_type=$ALPHA_COMPUTE_TYPE language=$ALPHA_LANGUAGE"
-echo "(Dialogos auto-falls back to CPU int8 if CUDA runtime is unavailable.)"
+echo "(Silicato auto-falls back to CPU int8 if CUDA runtime is unavailable.)"
 
 if [[ -n "${HF_TOKEN:-}" ]]; then
   echo "HF Hub auth: HF_TOKEN detected (authenticated model downloads)."
@@ -77,8 +77,8 @@ else
 fi
 
 echo
-echo "Running diagnostics (dialogos --doctor)..."
-"$PYTHON" -m dialogos --doctor
+echo "Running diagnostics (silicato --doctor)..."
+"$PYTHON" -m silicato --doctor
 
 echo
 HAS_TMUX_SESSION=0
@@ -87,8 +87,8 @@ if tmux list-panes -a >/dev/null 2>&1; then
   echo "tmux session detected."
 else
   echo "No active tmux session detected."
-  echo "Start one with: tmux new -s codex"
-  echo "Then start Codex in that tmux session."
+  echo "Start one with: tmux new -s agent"
+  echo "Then start your agent CLI (for example Codex or Claude Code) in that tmux session."
 fi
 
 if [[ "$NO_RUN" -eq 1 ]]; then
@@ -105,10 +105,10 @@ if [[ "$HAS_TMUX_SESSION" -eq 0 ]]; then
 fi
 
 echo
-echo "Launching Dialogos with alpha defaults (override by passing your own args):"
-echo "  $PYTHON -m dialogos --model $ALPHA_MODEL --device $ALPHA_DEVICE --compute-type $ALPHA_COMPUTE_TYPE --language $ALPHA_LANGUAGE ${FORWARD_ARGS[*]:-}"
+echo "Launching Silicato with alpha defaults (override by passing your own args):"
+echo "  $PYTHON -m silicato --model $ALPHA_MODEL --device $ALPHA_DEVICE --compute-type $ALPHA_COMPUTE_TYPE --language $ALPHA_LANGUAGE ${FORWARD_ARGS[*]:-}"
 
-exec "$PYTHON" -m dialogos \
+exec "$PYTHON" -m silicato \
   --model "$ALPHA_MODEL" \
   --device "$ALPHA_DEVICE" \
   --compute-type "$ALPHA_COMPUTE_TYPE" \

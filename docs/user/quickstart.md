@@ -11,7 +11,7 @@ Best effort target:
 Validated RC baseline:
 - Python 3.12.3
 - tmux 3.4
-- Codex CLI 0.107.0
+- Agent CLI (for example Codex CLI or Claude Code)
 
 ## 2) Install required system packages
 
@@ -20,12 +20,12 @@ sudo apt update
 sudo apt install -y alsa-utils ffmpeg python3-venv tmux
 ```
 
-## 3) Install Dialogos
+## 3) Install Silicato
 
 ### Option A: RC install from TestPyPI (`0.1.0rc1`)
 
 ```bash
-pipx install --index-url https://test.pypi.org/simple --pip-args='--extra-index-url https://pypi.org/simple' dialogos==0.1.0rc1
+pipx install --index-url https://test.pypi.org/simple --pip-args='--extra-index-url https://pypi.org/simple' silicato==0.1.0rc1
 ```
 
 ### Option B: install from source checkout
@@ -38,31 +38,31 @@ make install-dev
 make hooks
 ```
 
-## 4) Start Codex in tmux
+## 4) Start your agent CLI in tmux
 
 ```bash
-tmux new -s codex
-# run codex in this tmux session
+tmux new -s agent
+# run your agent CLI in this tmux session (for example codex or claude)
 ```
 
 ## 5) Verify runtime dependencies
 
 ```bash
-dialogos --doctor
+silicato --doctor
 ```
 
-## 6) Run Dialogos
+## 6) Run Silicato
 
 Normal mode (direct send):
 
 ```bash
-dialogos
+silicato
 ```
 
 Preview mode (explicit action before send):
 
 ```bash
-dialogos --preview
+silicato --preview
 ```
 
 Preview controls:
@@ -76,19 +76,19 @@ Preview controls:
 
 ```bash
 # one-off explicit target
-dialogos --tmux-target codex:0.1
+silicato --tmux-target codex:0.1
 
 # force picker even if a target is remembered
-dialogos --pick-target
+silicato --pick-target
 
 # env fallback target
-export DIALOGOS_TMUX_TARGET=codex:0.1
-dialogos
+export SILICATO_TMUX_TARGET=codex:0.1
+silicato
 ```
 
 Resolution order:
 1. `--tmux-target`
-2. `DIALOGOS_TMUX_TARGET`
+2. `SILICATO_TMUX_TARGET`
 3. remembered config target
 4. interactive picker
 
