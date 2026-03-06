@@ -65,6 +65,8 @@ Preview mode (explicit action before send):
 
 ```bash
 silicato --preview
+# short form:
+silicato -p
 ```
 
 Preview controls:
@@ -79,16 +81,19 @@ Preview controls:
 ```bash
 # one-off explicit target
 silicato --tmux-target codex:0.1
+# short form:
+silicato -t codex:0.1
 
-# force picker even if a target is remembered
-silicato --pick-target
-
-# env fallback target
+# opt in to env/config target reuse mode
 export SILICATO_TMUX_TARGET=codex:0.1
-silicato
+silicato --reuse-target
 ```
 
-Resolution order:
+Default resolution order:
+1. `--tmux-target`
+2. interactive picker
+
+`--reuse-target` resolution order:
 1. `--tmux-target`
 2. `SILICATO_TMUX_TARGET`
 3. remembered config target

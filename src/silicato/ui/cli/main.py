@@ -156,7 +156,10 @@ def main() -> int:
             if transcript_result is None:
                 break
             if not current_text:
-                print("Transcript: [no speech detected]")
+                if args.preview:
+                    print("Transcript: [no speech detected]")
+                else:
+                    print("No speech detected; skipping turn.")
                 _maybe_log(
                     log_turn,
                     action="skip",
@@ -168,7 +171,8 @@ def main() -> int:
                 )
                 break
 
-            print(f"Transcript: {current_text}")
+            if args.preview:
+                print(f"Transcript: {current_text}")
 
             if not args.preview:
                 try:

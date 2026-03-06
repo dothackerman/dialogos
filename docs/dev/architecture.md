@@ -51,8 +51,8 @@ Forbidden:
 - `adapters -> application|domain|ui`
 - `ui -> domain`
 
-## Turn behavior (unchanged)
-1. Resolve tmux target (`--tmux-target` -> `SILICATO_TMUX_TARGET` -> remembered target -> picker)
+## Turn behavior
+1. Resolve tmux target (`--tmux-target` -> picker by default, or `--reuse-target` mode: env -> remembered -> picker)
 2. Validate target
 3. Capture push-to-talk audio
 4. Transcribe locally

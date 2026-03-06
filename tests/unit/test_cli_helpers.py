@@ -11,6 +11,8 @@ class FakeTargetResolver:
         self.should_fail_target: str | None = None
         self.panes: list[PaneEntry] = []
         self.picked: str = ""
+        self.list_panes_calls = 0
+        self.pick_calls = 0
 
     def validate_target(self, target: str) -> None:
         self.validated.append(target)
@@ -18,11 +20,13 @@ class FakeTargetResolver:
             raise InvalidTmuxTargetError("bad")
 
     def list_panes(self) -> list[PaneEntry]:
+        self.list_panes_calls += 1
         return self.panes
 
     def pick_target_interactive(self, panes: list[PaneEntry], **kwargs: object) -> str:
         _ = panes
         _ = kwargs
+        self.pick_calls += 1
         return self.picked
 
     def print_no_tmux_guidance(self, **kwargs: object) -> None:
@@ -85,3 +89,22 @@ def test_resolve_tmux_target_uses_env_when_available() -> None:
 
     assert result.target == "env:0.5"
     assert resolver.validated == ["env:0.5"]
+
+
+def test_resolve_tmux_target_uses_picker_by_default_even_when_env_or_config_exist() -> None:
+    resolver = FakeTargetResolver()
+    resolver.panes = [PaneEntry(target="picked:0.1", command="bash", title="main")]
+    resolver.picked = "picked:0.1"
+    use_case = ResolveTargetUseCase(resolver)
+
+    result = use_case.execute(
+        explicit_target=None,
+        pick_target=True,
+        env_target="env:0.5",
+        remembered_target="cfg:0.1",
+    )
+
+    assert result.target == "picked:0.1"
+    assert resolver.validated == []
+    assert resolver.list_panes_calls == 1
+    assert resolver.pick_calls == 1

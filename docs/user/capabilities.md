@@ -6,8 +6,8 @@ In scope:
 - Push-to-talk speech capture with Enter start/stop
 - Local transcription via `faster-whisper`
 - Language selection: `de`, `en`, `auto`
-- tmux pane selection and persisted default target
-- Normal mode direct send after transcription
+- tmux pane selection at startup by default, with optional env/config reuse mode
+- Normal mode direct send after transcription (without local transcript echo)
 - Preview mode (`--preview`) with `send/edit/retry/skip/quit`
 - Local JSONL turn logs
 - Runtime diagnostics (`silicato --doctor`)

@@ -33,8 +33,8 @@ Out of scope for this RC:
 - Local speech capture via `arecord`
 - Local transcription via `faster-whisper`
 - Language selection: `en`, `de`, `auto`
-- tmux pane target selection with persisted default target
-- Normal mode: direct send after transcription
+- tmux pane target selection via interactive picker by default (`--reuse-target` to opt into env/config fallback)
+- Normal mode: direct send after transcription without local transcript echo
 - Preview mode: review/edit/retry/skip/quit before send
 - Runtime diagnostics via `silicato --doctor`
 - Local JSONL turn logging
@@ -98,9 +98,12 @@ Run preview mode:
 
 ```bash
 silicato --preview
+# short form:
+silicato -p
 ```
 
-Normal mode sends directly after transcription. Preview mode requires explicit confirmation.
+Normal mode sends directly after transcription and does not print the transcript locally.
+Preview mode requires explicit confirmation and shows transcript text for review.
 
 ## Known Issues
 
