@@ -109,6 +109,17 @@ tests = [
 ]
 
 [[rule]]
+id = "BR-TMUX-003"
+statement = "Tmux target validation rejects non-pane-scoped targets to prevent active-pane collisions across parallel runs."
+owner_layer = "adapters"
+requires_hardware = false
+tests = [
+  "tests/unit/test_tmux_picker.py::test_validate_target_accepts_pane_scoped_target",
+  "tests/unit/test_tmux_picker.py::test_validate_target_rejects_window_scoped_target",
+  "tests/contracts/test_target_resolver_contract.py::test_target_resolver_contract_rejects_non_pane_scoped_target",
+]
+
+[[rule]]
 id = "BR-HW-001"
 statement = "Local hardware checks validate arecord availability and tmux send smoke behavior."
 owner_layer = "adapters"

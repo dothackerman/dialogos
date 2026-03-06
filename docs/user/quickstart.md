@@ -94,6 +94,10 @@ Resolution order:
 3. remembered config target
 4. interactive picker
 
+Target format requirement:
+- Use pane-scoped targets only: `session:window.pane` (for example `codex:0.1`) or `%pane_id`.
+- Window/session-scoped targets (for example `codex:0`) are rejected to avoid cross-pane collisions.
+
 ## 8) Optional model download auth
 
 If Hugging Face warns about anonymous download limits:

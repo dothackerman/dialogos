@@ -63,6 +63,31 @@ def test_validate_target_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
             TmuxTargetResolver().validate_target("bad:0.1")
 
 
+def test_validate_target_accepts_pane_scoped_target(monkeypatch: pytest.MonkeyPatch) -> None:
+    result = subprocess.CompletedProcess(
+        args=["tmux"],
+        returncode=0,
+        stdout="codex:0.1\tbash\tmain\n",
+        stderr="",
+    )
+    with patched_run(monkeypatch, result):
+        TmuxTargetResolver().validate_target("codex:0.1")
+
+
+def test_validate_target_rejects_window_scoped_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    result = subprocess.CompletedProcess(
+        args=["tmux"],
+        returncode=0,
+        stdout="codex:0.0\tbash\tmain\ncodex:0.1\tpython\tworker\n",
+        stderr="",
+    )
+    with patched_run(monkeypatch, result):
+        with pytest.raises(InvalidTmuxTargetError, match="pane-scoped"):
+            TmuxTargetResolver().validate_target("codex:0")
+
+
 def test_pick_target_interactive_by_index() -> None:
     panes = [
         PaneEntry(target="codex:0.1", command="bash", title="main"),

@@ -23,6 +23,21 @@ def _detect_no_session(text: str) -> bool:
     return "no server running" in lowered or "failed to connect" in lowered
 
 
+def _is_pane_scoped_target(target: str) -> bool:
+    normalized = target.strip()
+    if not normalized:
+        return False
+    if normalized.startswith("%"):
+        return normalized[1:].isdigit()
+    if ":" not in normalized:
+        return False
+    scope = normalized.rsplit(":", 1)[-1]
+    if "." not in scope:
+        return False
+    pane_segment = scope.rsplit(".", 1)[-1]
+    return pane_segment.isdigit()
+
+
 class TmuxTargetResolver(TargetResolverPort):
     """Adapter for validating and selecting tmux targets."""
 
@@ -34,6 +49,10 @@ class TmuxTargetResolver(TargetResolverPort):
             check=False,
         )
         if result.returncode == 0:
+            if not _is_pane_scoped_target(target):
+                raise InvalidTmuxTargetError(
+                    "tmux target must be pane-scoped (session:window.pane or %pane_id)."
+                )
             return
         message = (result.stderr or result.stdout or "invalid tmux target").strip()
         if _detect_no_session(message):

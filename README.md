@@ -43,6 +43,7 @@ Out of scope for this RC:
 
 - Linux and tmux are mandatory
 - A terminal agent CLI (for example Codex or Claude Code) must run in a tmux pane
+- Explicit tmux targets must be pane-scoped (`session:window.pane` or `%pane_id`)
 - No always-on listening mode
 - No spoken output mode
 - Turn logs may contain transcript text and stay local on disk

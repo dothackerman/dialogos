@@ -50,6 +50,25 @@ def test_target_resolver_contract_maps_validation_errors(
         resolver.validate_target("bad:0.1")
 
 
+def test_target_resolver_contract_rejects_non_pane_scoped_target(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=["tmux"],
+            returncode=0,
+            stdout="codex:0.0\tbash\tmain\ncodex:0.1\tpython\tworker\n",
+            stderr="",
+        ),
+    )
+
+    resolver = TmuxTargetResolver()
+    with pytest.raises(InvalidTmuxTargetError, match="pane-scoped"):
+        resolver.validate_target("codex:0")
+
+
 def test_target_resolver_contract_maps_no_session_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         subprocess,
