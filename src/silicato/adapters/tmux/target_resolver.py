@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import subprocess
 from collections.abc import Callable
 
 from silicato.ports.targeting import (
@@ -12,6 +11,8 @@ from silicato.ports.targeting import (
     PickerAbortedError,
     TargetResolverPort,
 )
+
+from .runtime import TmuxRuntime
 
 TMUX_PANE_FORMAT = (
     "#{session_name}:#{window_index}.#{pane_index}\t#{pane_current_command}\t#{pane_title}"
@@ -41,13 +42,11 @@ def _is_pane_scoped_target(target: str) -> bool:
 class TmuxTargetResolver(TargetResolverPort):
     """Adapter for validating and selecting tmux targets."""
 
+    def __init__(self, *, runtime: TmuxRuntime | None = None) -> None:
+        self._runtime = runtime or TmuxRuntime()
+
     def validate_target(self, target: str) -> None:
-        result = subprocess.run(
-            ["tmux", "list-panes", "-t", target],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        result = self._runtime.list_panes(target=target)
         if result.returncode == 0:
             if not _is_pane_scoped_target(target):
                 raise InvalidTmuxTargetError(
@@ -60,12 +59,7 @@ class TmuxTargetResolver(TargetResolverPort):
         raise InvalidTmuxTargetError(message)
 
     def list_panes(self) -> list[PaneEntry]:
-        result = subprocess.run(
-            ["tmux", "list-panes", "-a", "-F", TMUX_PANE_FORMAT],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        result = self._runtime.list_panes(all_panes=True, pane_format=TMUX_PANE_FORMAT)
         if result.returncode != 0:
             message = (result.stderr or result.stdout or "tmux list-panes failed").strip()
             if _detect_no_session(message):

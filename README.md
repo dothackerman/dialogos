@@ -137,6 +137,7 @@ make test-rules-fast
 make test-rules
 make check
 make test-fast
+make test-e2e-tmux
 make test
 make gate
 ```

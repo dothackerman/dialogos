@@ -1,4 +1,4 @@
-.PHONY: install install-dev hooks format lint typecheck check check-rules test-arch test-rules test-rules-fast test test-fast gate alpha-preview alpha-preview-no-run alpha-reset release-test release-prod
+.PHONY: install install-dev hooks format lint typecheck check check-rules test-arch test-rules test-rules-fast test test-fast test-e2e-tmux gate alpha-preview alpha-preview-no-run alpha-reset release-test release-prod
 
 VENV_PYTHON := .venv/bin/python3
 
@@ -46,6 +46,9 @@ test:
 
 test-fast:
 	$(PYTHON) -m pytest -m "not hardware"
+
+test-e2e-tmux:
+	$(PYTHON) -m pytest tests/hardware/test_hardware_requirements.py::test_tmux_available tests/hardware/test_hardware_requirements.py::test_tmux_send_smoke_to_temp_pane
 
 gate: check test-rules-fast test-fast test
 

@@ -109,6 +109,16 @@ tests = [
 ]
 
 [[rule]]
+id = "BR-TMUX-004"
+statement = "Tmux runtime command construction is centralized in one adapter boundary."
+owner_layer = "adapters"
+requires_hardware = false
+tests = [
+  "tests/contracts/test_tmux_runtime_contract.py::test_tmux_runtime_contract_list_panes_builds_expected_command",
+  "tests/contracts/test_tmux_runtime_contract.py::test_tmux_runtime_contract_common_commands_build_expected_args",
+]
+
+[[rule]]
 id = "BR-TMUX-003"
 statement = "Tmux target validation rejects non-pane-scoped targets to prevent active-pane collisions across parallel runs."
 owner_layer = "adapters"
