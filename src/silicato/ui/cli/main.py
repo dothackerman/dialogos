@@ -25,6 +25,7 @@ from silicato.ports.storage import SilicatoConfig
 from silicato.ports.stt import TranscriptResult
 from silicato.ports.targeting import InvalidTmuxTargetError, NoTmuxSessionError, PickerAbortedError
 from silicato.ui.cli.args import parse_args
+from silicato.ui.cli.profiles import apply_profile
 from silicato.ui.cli.prompts import prompt_confirm, prompt_edit_text, prompt_turn_start
 from silicato.ui.cli.runtime_checks import require_binary, run_doctor
 
@@ -97,10 +98,19 @@ def main() -> int:
     sender = TmuxSender(target)
     send_turn = SendTurnUseCase(sender)
 
+    runtime = apply_profile(
+        profile=args.profile,
+        model=args.model,
+        device=args.device,
+        compute_type=args.compute_type,
+    )
+    if args.profile == "spawn":
+        print(runtime.reason)
+
     model, active_device, _active_compute_type = build_model(
-        args.model,
-        args.device,
-        args.compute_type,
+        runtime.model,
+        runtime.device,
+        runtime.compute_type,
     )
     capture_adapter = AlsaCaptureAdapter()
     stt_adapter = WhisperSttAdapter(model)
@@ -135,7 +145,7 @@ def main() -> int:
                 if active_device in {"auto", "cuda"} and is_cuda_runtime_missing(exc):
                     print("CUDA inference failed during transcription. Retrying on CPU.")
                     model, active_device, _active_compute_type = build_model(
-                        args.model,
+                        runtime.model,
                         "cpu",
                         "int8",
                     )

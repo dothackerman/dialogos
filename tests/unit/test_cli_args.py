@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from silicato.ui.cli.args import parse_args
 
 
@@ -43,6 +45,8 @@ def test_parse_args_supports_short_options() -> None:
     assert args.log_file == Path("/tmp/silicato.jsonl")
     assert args.once is True
     assert args.doctor is True
+    assert args.profile is None
+    assert args.spawn is False
 
 
 def test_parse_args_picker_is_default_and_reuse_can_be_opted_in() -> None:
@@ -51,3 +55,33 @@ def test_parse_args_picker_is_default_and_reuse_can_be_opted_in() -> None:
 
     reuse_args = parse_args(["--reuse-target"])
     assert reuse_args.pick_target is False
+
+
+def test_parse_args_supports_spawn_profile_alias_and_explicit_profile() -> None:
+    spawn_args = parse_args(["--spawn"])
+    assert spawn_args.spawn is True
+    assert spawn_args.profile == "spawn"
+
+    profile_args = parse_args(["--profile", "spawn"])
+    assert profile_args.spawn is False
+    assert profile_args.profile == "spawn"
+
+
+def test_parse_args_help_text_mentions_target_modes_and_preview_actions(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as exc:
+        parse_args(["--help"])
+
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    assert "--reuse-target" in out
+    assert "SILICATO_TMUX_TARGET" in out
+    assert "remembered config" in out
+    assert "y=send" in out
+    assert "e=edit" in out
+    assert "r=retry" in out
+    assert "s=skip" in out
+    assert "q=quit" in out
+    assert "--profile" in out
+    assert "--spawn" in out

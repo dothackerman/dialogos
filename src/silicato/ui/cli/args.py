@@ -14,12 +14,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
   silicato --reuse-target
   silicato -t codex:0.1 -p
   silicato --doctor
+  silicato --spawn
 """
     parser = argparse.ArgumentParser(
         prog="silicato",
         description=(
             "Record mic audio, transcribe locally, and send text to tmux "
-            "(direct in normal mode, confirmed in preview)."
+            "(direct in normal mode, explicit action in preview)."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=examples,
@@ -75,14 +76,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--pick-target",
         action="store_true",
         default=True,
-        help="Open interactive tmux pane picker at startup (default).",
+        help="Force interactive tmux pane picker at startup (default behavior).",
     )
     picker_mode.add_argument(
         "-R",
         "--reuse-target",
         dest="pick_target",
         action="store_false",
-        help="Reuse env/config target when available before showing picker.",
+        help=(
+            "Reuse env/config target before picker "
+            "(SILICATO_TMUX_TARGET -> remembered config -> picker)."
+        ),
     )
     parser.add_argument(
         "-n",
@@ -94,7 +98,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "-p",
         "--preview",
         action="store_true",
-        help=("Preview mode: show confirm/edit/retry/skip flow and require explicit send (y)."),
+        help=("Preview mode: require explicit action (y=send, e=edit, r=retry, s=skip, q=quit)."),
     )
     parser.add_argument(
         "-f",
@@ -110,9 +114,26 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Run exactly one completed turn and exit.",
     )
     parser.add_argument(
+        "--profile",
+        choices=["spawn"],
+        default=None,
+        help=(
+            "Apply a runtime profile preset. 'spawn' auto-tunes model/device/compute_type "
+            "for 3-4 parallel local instances."
+        ),
+    )
+    parser.add_argument(
+        "--spawn",
+        action="store_true",
+        help="Alias for --profile spawn.",
+    )
+    parser.add_argument(
         "-D",
         "--doctor",
         action="store_true",
         help="Print local environment checks and exit.",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.spawn:
+        args.profile = "spawn"
+    return args
