@@ -3,7 +3,7 @@
 ## RC4 scope (`0.1.0rc4`)
 
 In scope:
-- Push-to-talk speech capture with Enter start/stop
+- Push-to-talk speech capture with Enter start and auto-stop on long pause (manual Enter stop remains available)
 - Local transcription via `faster-whisper`
 - Language selection: `de`, `en`, `auto`
 - tmux pane selection at startup by default, with optional env/config reuse mode

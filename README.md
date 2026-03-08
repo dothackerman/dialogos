@@ -31,7 +31,7 @@ Out of scope for this RC:
 
 ## Capabilities
 
-- Push-to-talk capture controls: press Enter to start recording, then Enter again to stop
+- Push-to-talk capture controls: press Enter to start recording, then auto-stop after a long pause (Enter still stops manually)
 - Local speech capture via `arecord`
 - Local transcription via `faster-whisper`
 - Language selection: `en`, `de`, `auto`
@@ -113,8 +113,13 @@ silicato --profile my-custom-plugin
 
 Interactive turn controls:
 - Press Enter to start recording.
-- Press Enter again to stop recording and transcribe.
+- Recording stops automatically after a long pause in speech.
+- Press Enter during recording to stop manually.
 - Type `q` then Enter at the turn prompt to quit.
+
+Optional tuning:
+- `--silence-stop-seconds <seconds>` adjusts pause length before auto-stop (default `1.8`).
+- Set `--silence-stop-seconds 0` to disable auto-stop and require manual Enter stop.
 
 Run preview mode:
 

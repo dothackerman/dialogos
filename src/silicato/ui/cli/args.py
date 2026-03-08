@@ -65,6 +65,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Recording sample rate in Hz (default: 16000).",
     )
     parser.add_argument(
+        "--silence-stop-seconds",
+        type=float,
+        default=1.8,
+        help=(
+            "Auto-stop recording after this many silent seconds (default: 1.8). "
+            "Set to 0 to disable auto-stop and require Enter to stop."
+        ),
+    )
+    parser.add_argument(
         "-i",
         "--input-device",
         default=None,

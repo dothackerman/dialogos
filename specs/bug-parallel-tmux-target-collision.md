@@ -1,7 +1,8 @@
 # Silicato Bug Report - Parallel tmux Target Collision
 
-Status: Open (reported, not fixed)
+Status: Closed (no longer reproducible in current usage)
 Reported on: 2026-03-06
+Closed on: 2026-03-08
 
 ## Summary
 

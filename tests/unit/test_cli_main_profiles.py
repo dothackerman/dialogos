@@ -55,6 +55,7 @@ def test_main_uses_profile_resolved_model_settings(monkeypatch: pytest.MonkeyPat
         compute_type="float16",
         language="auto",
         sample_rate=16000,
+        silence_stop_seconds=1.8,
         input_device=None,
         tmux_target=None,
         pick_target=True,
@@ -74,7 +75,7 @@ def test_main_uses_profile_resolved_model_settings(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(cli_main, "ResolveTargetUseCase", _FakeResolveTargetUseCase)
     monkeypatch.setattr(cli_main, "TmuxSender", lambda *_a, **_k: object())
     monkeypatch.setattr(cli_main, "SendTurnUseCase", lambda *_a, **_k: object())
-    monkeypatch.setattr(cli_main, "AlsaCaptureAdapter", lambda: object())
+    monkeypatch.setattr(cli_main, "AlsaCaptureAdapter", lambda **_k: object())
     monkeypatch.setattr(cli_main, "WhisperSttAdapter", lambda *_a, **_k: object())
     monkeypatch.setattr(cli_main, "RunCaptureTranscribeUseCase", _FakeRunCaptureTranscribeUseCase)
     monkeypatch.setattr(cli_main, "JsonlTurnLogger", lambda *_a, **_k: object())
@@ -119,6 +120,7 @@ def test_main_returns_nonzero_when_profile_plugin_resolution_fails(
         compute_type="float16",
         language="auto",
         sample_rate=16000,
+        silence_stop_seconds=1.8,
         input_device=None,
         tmux_target=None,
         pick_target=True,

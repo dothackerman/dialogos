@@ -76,8 +76,13 @@ silicato --profile my-custom-plugin
 
 Turn controls:
 - Press Enter to start recording.
-- Press Enter again to stop recording and transcribe.
+- Recording stops automatically after a long pause in speech.
+- Press Enter during recording to stop manually.
 - Type `q` then Enter at the turn prompt to quit.
+
+Optional tuning:
+- `--silence-stop-seconds <seconds>` controls pause length before auto-stop (default `1.8`).
+- `--silence-stop-seconds 0` disables auto-stop and requires manual Enter stop.
 
 Preview mode (explicit action before send):
 
