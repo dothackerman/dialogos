@@ -22,10 +22,10 @@ sudo apt install -y alsa-utils ffmpeg python3-venv tmux
 
 ## 3) Install Silicato
 
-### Option A: RC install from PyPI (`0.1.0rc3`)
+### Option A: RC install from PyPI (`0.1.0rc4`)
 
 ```bash
-pipx install silicato==0.1.0rc3
+pipx install silicato==0.1.0rc4
 ```
 
 ### Option B: install from source checkout
@@ -61,11 +61,17 @@ Normal mode (direct send):
 silicato
 ```
 
-Spawn profile (hardware-aware preset for 3-4 parallel sessions):
+Spawn runtime plugin (hardware-aware preset for 3-4 parallel sessions):
 
 ```bash
 silicato --spawn
 # alias for: silicato --profile spawn
+```
+
+Use an external runtime plugin (if installed):
+
+```bash
+silicato --profile my-custom-plugin
 ```
 
 Turn controls:

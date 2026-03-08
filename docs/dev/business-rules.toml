@@ -16,13 +16,31 @@ tests = [
 
 [[rule]]
 id = "BR-CLI-001"
-statement = "CLI supports short option aliases and keeps picker as default startup behavior."
+statement = "CLI supports short option aliases, dynamic runtime plugin helper text, and keeps picker as default startup behavior."
 owner_layer = "ui"
 requires_hardware = false
 tests = [
   "tests/unit/test_cli_args.py::test_parse_args_supports_short_options",
   "tests/unit/test_cli_args.py::test_parse_args_picker_is_default_and_reuse_can_be_opted_in",
+  "tests/unit/test_cli_args.py::test_parse_args_accepts_custom_profile_plugin_name",
   "tests/unit/test_cli_args.py::test_parse_args_help_text_mentions_target_modes_and_preview_actions",
+  "tests/unit/test_cli_args.py::test_parse_args_help_text_lists_discovered_runtime_plugins",
+]
+
+[[rule]]
+id = "BR-RUNTIME-001"
+statement = "Runtime tuning profiles are plugin-resolved so core CLI runs without spawn-specific coupling and external plugins can be discovered."
+owner_layer = "ui"
+requires_hardware = false
+tests = [
+  "tests/unit/test_cli_profiles.py::test_resolve_runtime_settings_returns_manual_settings_when_profile_absent",
+  "tests/unit/test_cli_profiles.py::test_resolve_runtime_settings_spawn_cpu_fallback_when_no_gpu",
+  "tests/unit/test_cli_profiles.py::test_resolve_runtime_settings_spawn_6gb_gpu_prefers_small_int8_float16",
+  "tests/unit/test_cli_profiles.py::test_resolve_runtime_settings_unknown_plugin_raises_with_available_names",
+  "tests/unit/test_cli_profiles.py::test_available_runtime_profiles_includes_entrypoint_plugins",
+  "tests/unit/test_cli_profiles.py::test_resolve_runtime_settings_uses_callable_entrypoint_plugin",
+  "tests/unit/test_cli_main_profiles.py::test_main_uses_profile_resolved_model_settings",
+  "tests/unit/test_cli_main_profiles.py::test_main_returns_nonzero_when_profile_plugin_resolution_fails",
 ]
 
 [[rule]]

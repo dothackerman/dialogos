@@ -6,8 +6,12 @@ import argparse
 from collections.abc import Sequence
 from pathlib import Path
 
+from silicato.ui.cli.runtime_plugins import available_runtime_profiles
+
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    available_profiles = available_runtime_profiles()
+    profiles_text = ", ".join(available_profiles) if available_profiles else "(none)"
     examples = """Examples:
   silicato -m small -l auto
   silicato
@@ -15,6 +19,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
   silicato -t codex:0.1 -p
   silicato --doctor
   silicato --spawn
+  silicato --profile my-custom-plugin
 """
     parser = argparse.ArgumentParser(
         prog="silicato",
@@ -115,11 +120,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--profile",
-        choices=["spawn"],
+        metavar="PLUGIN",
         default=None,
         help=(
-            "Apply a runtime profile preset. 'spawn' auto-tunes model/device/compute_type "
-            "for 3-4 parallel local instances."
+            f"Apply a runtime plugin profile by name. Available now: {profiles_text}. "
+            "External plugins can be provided via Python entry points group "
+            "'silicato.runtime_profiles'."
         ),
     )
     parser.add_argument(

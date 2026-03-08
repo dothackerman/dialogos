@@ -75,7 +75,7 @@ Optional overrides:
 - `SKIP_GATE=1` to skip local `make gate` (not recommended)
 
 Version examples:
-- RC: `0.1.0rc3`
+- RC: `0.1.0rc4`
 - Final: `0.1.0`
 
 What the command does:

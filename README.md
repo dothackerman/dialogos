@@ -2,7 +2,7 @@
 
 Silicato is a Linux voice bridge from push-to-talk microphone input to a selected AI-agent tmux pane.
 
-Current release candidate: `0.1.0rc3`.
+Current release candidate: `0.1.0rc4`.
 
 ## Supported Platforms
 
@@ -17,9 +17,10 @@ Validated baseline for this RC:
 
 ## Release Scope
 
-`0.1.0rc3` is intentionally limited to the current feature set:
+`0.1.0rc4` is intentionally limited to the current feature set:
 - Push-to-talk transcription flow
 - Optional preview mode (`--preview`) for `send/edit/retry/skip/quit`
+- Runtime profile plugins (built-in `spawn`, external plugin discovery via entry points)
 - Required tmux + terminal agent CLI workflow
 - Existing target resolution, config persistence, JSONL logging, and doctor diagnostics
 
@@ -38,7 +39,8 @@ Out of scope for this RC:
 - Normal mode: direct send after transcription without local transcript echo
 - Preview mode: review/edit/retry/skip/quit before send
 - Runtime diagnostics via `silicato --doctor`
-- Hardware-aware spawn profile via `silicato --spawn` for 3-4 parallel sessions
+- Runtime plugin support via `--profile` (built-in `spawn`, plus external plugins)
+- Hardware-aware spawn runtime plugin via `silicato --spawn` for 3-4 parallel sessions
 - Local JSONL turn logging
 
 ## Limitations
@@ -52,10 +54,10 @@ Out of scope for this RC:
 
 ## Install
 
-### Install from PyPI (`0.1.0rc3`)
+### Install from PyPI (`0.1.0rc4`)
 
 ```bash
-pipx install silicato==0.1.0rc3
+pipx install silicato==0.1.0rc4
 ```
 
 ### Source install
@@ -96,11 +98,17 @@ Run normal mode:
 silicato
 ```
 
-Run spawn profile (recommended for 3-4 parallel instances on constrained GPUs):
+Run spawn runtime plugin (recommended for 3-4 parallel instances on constrained GPUs):
 
 ```bash
 silicato --spawn
 # alias for: silicato --profile spawn
+```
+
+Run a custom runtime plugin (after installing a plugin package):
+
+```bash
+silicato --profile my-custom-plugin
 ```
 
 Interactive turn controls:

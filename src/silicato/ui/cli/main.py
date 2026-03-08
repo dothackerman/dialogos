@@ -25,9 +25,9 @@ from silicato.ports.storage import SilicatoConfig
 from silicato.ports.stt import TranscriptResult
 from silicato.ports.targeting import InvalidTmuxTargetError, NoTmuxSessionError, PickerAbortedError
 from silicato.ui.cli.args import parse_args
-from silicato.ui.cli.profiles import apply_profile
 from silicato.ui.cli.prompts import prompt_confirm, prompt_edit_text, prompt_turn_start
 from silicato.ui.cli.runtime_checks import require_binary, run_doctor
+from silicato.ui.cli.runtime_plugins import RuntimeProfilePluginError, resolve_runtime_settings
 
 
 def _maybe_log(
@@ -98,13 +98,18 @@ def main() -> int:
     sender = TmuxSender(target)
     send_turn = SendTurnUseCase(sender)
 
-    runtime = apply_profile(
-        profile=args.profile,
-        model=args.model,
-        device=args.device,
-        compute_type=args.compute_type,
-    )
-    if args.profile == "spawn":
+    try:
+        runtime = resolve_runtime_settings(
+            profile=args.profile,
+            model=args.model,
+            device=args.device,
+            compute_type=args.compute_type,
+        )
+    except RuntimeProfilePluginError as exc:
+        print(f"Runtime profile error: {exc}", file=sys.stderr)
+        return 1
+
+    if runtime.reason != "manual settings":
         print(runtime.reason)
 
     model, active_device, _active_compute_type = build_model(

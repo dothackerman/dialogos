@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.0rc4] - 2026-03-08
+
+### Added
+- Runtime profile plugin architecture in the CLI layer with dynamic discovery via Python entry points group `silicato.runtime_profiles`.
+- Built-in `spawn` runtime plugin implementation separated from core CLI runtime flow.
+- Dynamic CLI helper text that lists currently discovered runtime plugins at execution time.
+- New rule-catalog coverage for runtime plugin resolution semantics.
+
+### Changed
+- `--profile` now accepts plugin names dynamically instead of a fixed choice list.
+- Core CLI runtime now resolves profile behavior through plugin boundaries (no spawn-specific tuning logic in core flow).
+- Documentation synchronized for plugin-based runtime tuning and release candidate `0.1.0rc4`.
+- Bumped package version to `0.1.0rc4`.
+
 ## [0.1.0rc3] - 2026-03-06
 
 ### Added

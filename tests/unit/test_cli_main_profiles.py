@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import pytest
 
 from silicato.ports.storage import SilicatoConfig
-from silicato.ui.cli.profiles import RuntimeSettings
+from silicato.ui.cli.runtime_plugins import RuntimeProfilePluginError, RuntimeSettings
 
 
 @dataclass
@@ -84,7 +84,7 @@ def test_main_uses_profile_resolved_model_settings(monkeypatch: pytest.MonkeyPat
 
     monkeypatch.setattr(
         cli_main,
-        "apply_profile",
+        "resolve_runtime_settings",
         lambda **_k: RuntimeSettings(
             model="small",
             device="cuda",
@@ -105,3 +105,48 @@ def test_main_uses_profile_resolved_model_settings(monkeypatch: pytest.MonkeyPat
 
     assert rc == 0
     assert called == [("small", "cuda", "int8_float16")]
+
+
+def test_main_returns_nonzero_when_profile_plugin_resolution_fails(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from silicato.ui.cli import main as cli_main
+
+    args = Namespace(
+        model="medium",
+        device="cuda",
+        compute_type="float16",
+        language="auto",
+        sample_rate=16000,
+        input_device=None,
+        tmux_target=None,
+        pick_target=True,
+        no_remember_target=False,
+        preview=False,
+        log_file=None,
+        once=False,
+        doctor=False,
+        profile="eco",
+        spawn=False,
+    )
+
+    monkeypatch.setattr(cli_main, "parse_args", lambda: args)
+    monkeypatch.setattr(cli_main, "require_binary", lambda *_a, **_k: None)
+    monkeypatch.setattr(cli_main, "TomlConfigStore", _FakeConfigStore)
+    monkeypatch.setattr(cli_main, "TmuxTargetResolver", lambda: object())
+    monkeypatch.setattr(cli_main, "ResolveTargetUseCase", _FakeResolveTargetUseCase)
+
+    def _raise_profile_error(**_kwargs: object) -> RuntimeSettings:
+        raise RuntimeProfilePluginError("missing plugin")
+
+    monkeypatch.setattr(
+        cli_main,
+        "resolve_runtime_settings",
+        _raise_profile_error,
+    )
+
+    rc = cli_main.main()
+
+    assert rc == 1
+    assert "Runtime profile error: missing plugin" in capsys.readouterr().err

@@ -33,6 +33,7 @@ Intent: enable a local-first communication channel between human speech and term
 
 ### `src/silicato/ui/`
 - CLI argument parsing, prompts, output rendering, and dependency wiring
+- Runtime profile plugin discovery/selection (`--profile`, built-in + entry-point plugins)
 - Entry points stay `silicato` and `python3 -m silicato`
 - May compose adapters and call application use-cases
 

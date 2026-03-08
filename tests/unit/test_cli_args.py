@@ -67,6 +67,11 @@ def test_parse_args_supports_spawn_profile_alias_and_explicit_profile() -> None:
     assert profile_args.profile == "spawn"
 
 
+def test_parse_args_accepts_custom_profile_plugin_name() -> None:
+    profile_args = parse_args(["--profile", "eco"])
+    assert profile_args.profile == "eco"
+
+
 def test_parse_args_help_text_mentions_target_modes_and_preview_actions(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -85,3 +90,21 @@ def test_parse_args_help_text_mentions_target_modes_and_preview_actions(
     assert "q=quit" in out
     assert "--profile" in out
     assert "--spawn" in out
+
+
+def test_parse_args_help_text_lists_discovered_runtime_plugins(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        "silicato.ui.cli.args.available_runtime_profiles",
+        lambda: ["eco", "spawn"],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        parse_args(["--help"])
+
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    assert "Available now:" in out
+    assert "eco, spawn" in out

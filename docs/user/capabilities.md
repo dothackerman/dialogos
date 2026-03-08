@@ -1,6 +1,6 @@
 # Capabilities
 
-## RC3 scope (`0.1.0rc3`)
+## RC4 scope (`0.1.0rc4`)
 
 In scope:
 - Push-to-talk speech capture with Enter start/stop
@@ -12,12 +12,16 @@ In scope:
 - Preview mode (`--preview`) with `send/edit/retry/skip/quit`
 - Local JSONL turn logs
 - Runtime diagnostics (`silicato --doctor`)
-- Hardware-aware spawn profile (`silicato --spawn`) for multi-instance stability
+- Runtime profile plugins via `--profile` (built-in `spawn` + optional external plugins)
+- Hardware-aware spawn plugin (`silicato --spawn`) for multi-instance stability
 
-## Spawn profile behavior
+## Runtime plugin behavior
 
 `silicato --spawn` (alias: `--profile spawn`) auto-tunes model/device/compute type to make
 3-4 parallel local sessions realistic on the detected hardware.
+
+External plugins can be installed via Python entry points group:
+- `silicato.runtime_profiles`
 
 Current preset strategy:
 - No NVIDIA GPU detected: `small + cpu + int8`
@@ -34,7 +38,7 @@ For 6GB GPUs (for example RTX 3060 Laptop), expected resolution is:
 - Terminal agent CLI running inside tmux (for example Codex or Claude Code)
 - Silicato injects transcript text into selected tmux pane and submits the prompt
 
-## Out of scope for RC3
+## Out of scope for RC4
 
 - Always-on mode with silence segmentation
 - Spoken assistant replies (TTS)
