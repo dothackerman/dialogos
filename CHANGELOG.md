@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.0rc6] - 2026-03-11
+
+### Added
+- Named pane routing workflow (`silicato route ...`) plus direct route injection (`silicato inject --to <id> ...`).
+- Shared live/offline auto-stop detector parity coverage and related rule-catalog mappings.
+- ADR records for recording-limit policy evolution (`ADR-0005`, `ADR-0006`).
+
+### Changed
+- Max-duration recording cap is now disabled by default; hard cap is opt-in via `--max-recording-seconds > 0`.
+- CLI/docs onboarding flow was restructured for faster human scanning, including explicit `pipx`, clone-run, and maintainer release lanes.
+- Release workflow reliability improved for GitHub release publishing steps.
+- Bumped package version to `0.1.0rc6`.
+
 ## [0.1.0rc5] - 2026-03-10
 
 ### Added

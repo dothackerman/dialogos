@@ -22,10 +22,10 @@ sudo apt install -y alsa-utils ffmpeg python3-venv tmux
 
 ## 3) Install Silicato
 
-### Option A: RC install from PyPI (`0.1.0rc5`)
+### Option A: RC install from PyPI (`0.1.0rc6`)
 
 ```bash
-pipx install silicato==0.1.0rc5
+pipx install silicato==0.1.0rc6
 ```
 
 ### Option B: install from source checkout

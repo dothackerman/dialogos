@@ -1,6 +1,6 @@
 # Capabilities
 
-## RC5 scope (`0.1.0rc5`)
+## RC6 scope (`0.1.0rc6`)
 
 In scope:
 - Push-to-talk speech capture with Enter start and auto-stop on long pause (manual Enter stop remains available, tuned default: `1.4s` pause and RMS threshold `80`)
@@ -41,7 +41,7 @@ For 6GB GPUs (for example RTX 3060 Laptop), expected resolution is:
 - Terminal agent CLI running inside tmux (for example Codex or Claude Code)
 - Silicato injects transcript text into selected tmux pane and submits the prompt
 
-## Out of scope for RC5
+## Out of scope for RC6
 
 - Always-on mode with silence segmentation
 - Spoken assistant replies (TTS)
