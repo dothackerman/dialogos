@@ -138,25 +138,17 @@ Useful tuning:
 - `--max-recording-seconds <seconds>` enables hard-stop only when `> 0`
   (default `0`, disabled)
 
-## Known Issues
+## Submit Reliability (Resolved)
 
 ### Agent submit timing in tmux
 
 Status:
-- Silicato mitigates this by splitting text send and submit key send with a conservative 250ms delay.
-- Silicato also fails fast when the target pane is already busy (for example `Thinking ... ctrl+q enqueue`) so sends are not reported as successful when the agent cannot submit yet.
-- The issue has been observed with terminal agent UIs in tmux on Linux.
+- This bug is resolved in current `main` for the supported tmux + terminal-agent flow.
+- Silicato sends text and submit as split tmux operations with a conservative `250ms` delay.
+- Silicato waits for loading panes to become ready before submit attempts.
+- Silicato fails fast when the target pane is already busy (for example `Thinking ... ctrl+q enqueue`) so sends are not reported as successful when the agent cannot submit yet.
 
-Symptom:
-- Transcript text appears in the agent input but is not submitted until manual Enter.
-
-Current mitigation in Silicato:
-1. Send transcript text first.
-2. If the agent pane is still loading, wait briefly until it is ready.
-3. Send Enter as a separate tmux operation.
-4. Fail fast if the pane is already busy processing another request.
-
-If you still see this behavior, open a bug report and include:
+If you still see this behavior in a future run, open a bug report and include:
 - OS distribution and version
 - terminal emulator
 - tmux version

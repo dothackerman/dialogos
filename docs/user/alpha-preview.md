@@ -84,13 +84,16 @@ This removes local state files if present:
 - `$XDG_CONFIG_HOME/silicato/config.toml` (fallback `~/.config/silicato/config.toml`)
 - `$XDG_STATE_HOME/silicato/turns.jsonl` (fallback `~/.local/state/silicato/turns.jsonl`)
 
-## Known issue note: submit timing in tmux agent pane
+## Resolved issue update: submit timing in tmux agent pane
 
-Silicato mitigates missed submits by splitting text send and submit key into separate tmux operations with a conservative 250ms delay.
-If the target pane is still loading environment state, Silicato waits briefly before sending.
-Silicato also fails fast if the target pane is already busy (for example showing `Thinking ... ctrl+q enqueue`) so users can retry after the current turn completes.
+This bug is resolved in current `main` for the supported tmux + terminal-agent flow.
 
-If the symptom persists (text appears but prompt does not submit), include these details in bug reports:
+Current safeguards:
+- Split text/send submit operations with a conservative `250ms` delay.
+- Wait for loading panes before submit attempts.
+- Fail fast for busy panes (for example `Thinking ... ctrl+q enqueue`) so users can retry after the active turn finishes.
+
+If the symptom reappears, include these details in bug reports:
 - OS version
 - terminal emulator
 - tmux version

@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Resolved tmux/GitHub Copilot submit race conditions by hardening sender readiness/busy-state handling and increasing split submit delay.
+
 ## [0.1.0rc6] - 2026-03-11
 
 ### Added
